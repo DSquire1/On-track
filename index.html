@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OnTrack — järnvägsquiz (inofficiellt fan-projekt)</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+  :root{
+    --bg:#0b1424; --bg2:#111f38; --panel:#16294a; --panel2:#1d3560;
+    --ink:#eaf1ff; --muted:#9fb2d4; --line:#2b4270;
+    --gold:#f4c542; --gold2:#d9a521; --red:#e23c48; --green:#28c07a;
+    --blue:#4a90e2; --shadow:0 8px 30px rgba(0,0,0,.35); --r:14px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,sans-serif;background:
+    radial-gradient(1200px 600px at 50% -10%, #1b2e52 0%, var(--bg) 55%);color:var(--ink);min-height:100vh}
+  body.viewer{background:radial-gradient(1200px 700px at 50% -5%, #24406f 0%, var(--bg) 60%)}
+  .wrap{max-width:980px;margin:0 auto;padding:20px 18px 60px}
+  header{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+  .logo{font-weight:800;letter-spacing:.5px;font-size:22px}
+  .logo .rail{color:var(--gold)}
+  .tag{font-size:12px;color:var(--muted);border:1px solid var(--line);padding:3px 8px;border-radius:20px}
+  .tag.live{color:#04301d;background:var(--green);border-color:var(--green);font-weight:700}
+  .spacer{flex:1}
+  button{font-family:inherit;cursor:pointer;border:none;border-radius:10px;font-weight:600;transition:.12s transform,.12s filter}
+  button:active{transform:translateY(1px)}
+  button:disabled{opacity:.38;cursor:not-allowed}
+  .btn{background:var(--panel2);color:var(--ink);padding:10px 14px;border:1px solid var(--line)}
+  .btn:hover:not(:disabled){filter:brightness(1.15)}
+  .btn-gold{background:linear-gradient(180deg,var(--gold),var(--gold2));color:#2a1e00}
+  .btn-red{background:var(--red);color:#fff}
+  .btn-green{background:var(--green);color:#04301d}
+  .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--muted)}
+  .score{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;margin-bottom:16px}
+  .team{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;box-shadow:var(--shadow)}
+  .team h3{margin:0 0 2px;font-size:15px}
+  .team .pts{font-size:34px;font-weight:800;line-height:1}
+  .team .adj{display:flex;gap:6px;margin-top:8px}
+  .team .adj button{width:36px;height:30px;background:var(--panel2);border:1px solid var(--line);color:var(--ink);font-size:15px;border-radius:8px}
+  .vs{align-self:center;text-align:center;color:var(--muted);font-size:12px}
+  .vs .max{display:block;color:var(--gold);font-weight:700;font-size:13px;margin-top:2px}
+  .progress{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+  .seg-dot{font-size:11px;color:var(--muted);border:1px solid var(--line);padding:4px 9px;border-radius:20px;background:var(--bg2)}
+  .seg-dot.done{color:var(--green);border-color:var(--green)}
+  .seg-dot.current{color:#2a1e00;background:var(--gold);border-color:var(--gold);font-weight:700}
+  .stage{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);
+    border-radius:18px;padding:22px;box-shadow:var(--shadow);min-height:340px}
+  .kicker{color:var(--gold);font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase}
+  .stage h2{margin:6px 0 4px;font-size:26px}
+  .sub{color:var(--muted);font-size:14px;margin-bottom:16px}
+  .ladder{display:flex;flex-direction:column;gap:8px;margin:14px 0}
+  .rung{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;opacity:.32;transition:.2s}
+  .rung.shown{opacity:1}
+  .rung.current{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
+  .rung .row{display:grid;grid-template-columns:56px 1fr;gap:12px;align-items:center}
+  .rung .chip{font-weight:800;font-size:20px;text-align:center;background:var(--panel2);border-radius:10px;padding:8px 0;color:var(--gold)}
+  .rung p{margin:0;font-size:15.5px;line-height:1.45}
+  .hidden-txt{color:var(--muted);font-style:italic}
+  .badges{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 0 68px}
+  .badge{font-size:12px;padding:3px 9px;border-radius:20px;background:var(--panel2);border:1px solid var(--line)}
+  .badge.ok{background:rgba(40,192,122,.18);border-color:var(--green);color:#bff5da}
+  .badge.no{background:rgba(226,60,72,.18);border-color:var(--red);color:#ffc9ce}
+  .controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+  .buzz{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+  .buzzbtn{padding:14px 16px;font-size:15px;border-radius:12px}
+  .panel{margin-top:16px;background:var(--panel);border:1px solid var(--gold);border-radius:14px;padding:16px}
+  .panel h4{margin:0 0 10px;color:var(--gold)}
+  .judge-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 0;border-top:1px solid var(--line)}
+  .judge-row:first-of-type{border-top:none}
+  .judge-row .who{flex:1;min-width:160px}
+  .facit{margin-top:16px;background:rgba(40,192,122,.1);border:1px solid var(--green);border-radius:12px;padding:14px 16px}
+  .facit h4{margin:0 0 6px;color:var(--green)}
+  .facit .why{color:var(--muted);font-size:13.5px;margin-top:8px;line-height:1.5}
+  .fu{margin-top:16px}
+  .fu h4{margin:14px 0 8px;font-size:15px;color:var(--gold)}
+  .q{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+  .q .intro{font-size:13.5px;color:var(--muted);line-height:1.55;margin-bottom:8px;font-style:italic;border-left:3px solid var(--gold2);padding-left:10px}
+  .q .qt{font-size:15px;font-weight:600}
+  .q .ans{color:var(--green);font-weight:600;font-size:14.5px;margin-top:8px;display:none}
+  .q .ans.show{display:block}
+  .q button{margin-top:8px;font-size:12px;padding:5px 10px}
+  .note{font-size:12px;color:var(--muted);margin-top:8px}
+  .foot{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:10px;flex-wrap:wrap}
+  .center{text-align:center;padding:20px 10px}
+  .center h2{font-size:30px}
+  .center input{background:var(--bg2);border:1px solid var(--line);color:var(--ink);padding:11px 13px;border-radius:10px;font-size:15px;margin:6px;width:220px;max-width:80%}
+  .winner{font-size:40px;font-weight:800;color:var(--gold);margin:10px 0}
+  .pill{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--muted);margin-top:8px}
+  .bridge{margin-top:14px;background:rgba(74,144,226,.14);border:1px solid var(--blue);border-radius:12px;padding:14px 16px;font-size:15px;line-height:1.5}
+  .hostfacit{display:inline-block;margin-bottom:12px;font-size:12.5px;color:var(--gold);
+    border:1px dashed var(--gold2);border-radius:8px;padding:5px 11px;background:rgba(244,197,66,.08)}
+  .facit .why{font-size:14.5px;color:var(--ink);line-height:1.65;margin-top:8px;white-space:pre-line}
+  .awardrow{margin-top:10px;font-size:12.5px;color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .awardrow button{padding:5px 11px;font-size:12px}
+  .awarded{margin-top:10px;font-size:13px;color:var(--green);font-weight:600}
+  /* Listan */
+  .optgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:14px 0}
+  .opt{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:14px;font-size:15px;
+    font-weight:600;color:var(--ink);text-align:left;cursor:pointer}
+  .opt.picked{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset;background:rgba(244,197,66,.1)}
+  .opt.rightpick{border-color:var(--green);background:rgba(40,192,122,.16)}
+  .opt.wrongpick{border-color:var(--red);background:rgba(226,60,72,.16)}
+  .opt.missed{border-color:var(--green);border-style:dashed;opacity:.75}
+  .opt .mark{float:right;font-size:14px}
+  /* Närmast vinner */
+  .mapbox{position:relative;margin:14px 0;border:1px solid var(--line);border-radius:14px;overflow:hidden;
+    background:linear-gradient(180deg,#132443,#0e1b33);height:380px;cursor:crosshair}
+  .mapbox.locked{cursor:default}
+  .mapgrid{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),
+    linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:12.5% 12.5%;opacity:.35}
+  .refdot{position:absolute;transform:translate(-50%,-50%);text-align:center;pointer-events:none}
+  .refdot .d{width:8px;height:8px;border-radius:50%;background:var(--muted);margin:0 auto}
+  .refdot .l{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap}
+  .marker{position:absolute;transform:translate(-50%,-100%);font-size:26px;pointer-events:none;
+    filter:drop-shadow(0 2px 4px rgba(0,0,0,.6))}
+  .marker .ml{font-size:11px;font-weight:700;background:var(--panel2);border:1px solid var(--line);
+    border-radius:8px;padding:2px 7px;position:absolute;left:50%;transform:translateX(-50%);top:-16px;white-space:nowrap}
+  .target{position:absolute;transform:translate(-50%,-50%);font-size:24px;color:var(--gold);pointer-events:none;
+    filter:drop-shadow(0 0 6px rgba(244,197,66,.8))}
+  /* Startskärmens resväljare */
+  .pickgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin:16px auto 4px;max-width:760px;text-align:left}
+  .resapick{display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--line);
+    border-radius:10px;padding:10px 12px;font-size:14.5px;cursor:pointer}
+  .resapick:has(input:checked){border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
+  .resapick .sv{margin-left:auto;font-size:12px;color:var(--muted)}
+  .resapick input{accent-color:var(--gold)}
+  /* Listan-bilder */
+  .opt img{display:block;width:100%;height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px;background:var(--panel2)}
+  /* Leaflet-karta */
+  #lmap{height:420px;cursor:crosshair}
+  #lmap.locked{cursor:default}
+  .leaflet-container{background:#0e1b33;font-family:inherit}
+  .leaflet-tooltip{background:var(--panel);color:var(--ink);border:1px solid var(--gold);border-radius:8px;font-weight:700}
+  .leaflet-tooltip-top:before{border-top-color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">OnTrack <span class="rail">══</span></div>
+    <span class="tag">Inofficiellt fan-projekt · ej anslutet till SVT</span>
+    <span class="tag" id="modeTag">Spelledarvy</span>
+    <div class="spacer"></div>
+    <button class="btn" id="viewerBtn" onclick="openViewer()">📺 Öppna tittarvy</button>
+    <button class="btn-ghost" id="resetBtn" onclick="resetMatch()">↺ Börja om</button>
+  </header>
+  <div id="scoreboard" class="score" style="display:none"></div>
+  <div id="progress" class="progress" style="display:none"></div>
+  <div id="stage" class="stage"></div>
+</div>
+
+<script src="resor-data.js"></script>
+<script>
+/* ================= VY ================= */
+const IS_VIEWER = location.hash.indexOf('tittare')>=0;
+let viewerWin = null;
+
+/* ================= SPELDATA ================= */
+/* Kuraterade versioner (med kuriosa-intron och berättar-facit). Resor från wikin
+   läses in via resor-data.js (genereras av build-resor.py) och merge:as nedan —
+   kuraterad version vinner om samma resa finns i båda. */
+const RESOR_LOCAL = {
+  marseille:{ namn:"Marseille", land:"Frankrike", flagga:"🇫🇷",
+    clues:[
+      {p:10,t:"Frankrikes äldsta stad grundades en gång av greker från Fokaia — men det stridsrop som fick sitt namn efter våra frivilliga skrevs faktiskt uppe i Strasbourg."},
+      {p:8,t:"Trots att laget siktar „rakt mot mål” blev vi 1993 det första franska laget att lyfta Europas finaste bucklan. Härifrån kommer också en hiphopgrupp som säger sig ha invaderat från Mars."},
+      {p:6,t:"I förorten La Castellane sparkade en blivande världsmästare sina första bollar, och här föddes även den kragresande ikonen som blev kung på Old Trafford."},
+      {p:4,t:"På en klippö utanför hamnen satt en greve fången i Dumas roman, medan „La Bonne Mère” vakar över staden uppe på sin höjd."},
+      {p:2,t:"Vid Medelhavet ligger Frankrikes näst största stad och största hamn — hemstaden för både bouillabaisse och pastis."}
+    ],
+    why:"Vi är framme i Marseille — Frankrikes äldsta stad, grundad för omkring 2600 år sedan av grekiska sjöfarare från Fokaia, därav smeknamnet „den fokeiska staden”. \n\nDen klurigaste ledtråden gömde nationalsången: La Marseillaise fick sitt namn efter just Marseilles frivilliga soldater som sjöng den på marschen in i Paris 1792 — men själva sången skrevs faktiskt i Strasbourg, vår lilla vilseledning.\n\nFotbollsledtråden syftar på Olympique de Marseille, vars motto är „Droit au but”, rakt mot mål, och som 1993 blev det första franska laget att vinna Champions League. Hiphopgruppen är IAM, vars namn leker med Mars — en klassisk metafor för staden.\n\nPå sexpoängaren föddes två fotbollsikoner här: Zinedine Zidane växte upp i förorten La Castellane, och Éric Cantona, mannen med den uppfällda kragen på Old Trafford.\n\nKlippön är Château d'If, fängelset i Dumas Greven av Monte Cristo, och „La Bonne Mère” är basilikan Notre-Dame de la Garde som vakar från stadens högsta kulle.",
+    foljd:[
+      {intro:"Marseilles hamn har varit stadens pulsåder i 2600 år, ända sedan grekerna klev i land. Här trängs fiskebåtar med lyxyachter och varje morgon hålls fiskmarknad direkt på kajen.",
+       q:"Vad heter den gamla hamnen i stadens hjärta?", a:"Vieux-Port (Gamla hamnen)"},
+      {intro:"Ute i havsbandet reser sig en fästning som kung Frans I lät bygga på 1500-talet. Den blev världsberömd som fängelse i en roman där hjälten till slut gräver sig fri.",
+       q:"Vad heter ö-fästningen, känd från Dumas roman?", a:"Château d'If"},
+      {intro:"Rätten föddes som fattigmanskost när fiskarna kokade soppa på dagens osålda fångst. Idag kan en autentisk version på stadens finkrogar kosta hundratals euro.",
+       q:"Vad heter den klassiska fisksoppan?", a:"Bouillabaisse"},
+      {intro:"När absinten förbjöds i Frankrike uppstod ett sug efter en ny anisdryck. På 1930-talet lanserade en driftig Marseillebo sin variant som blev söderns nationaldryck.",
+       q:"Vilken anisdryck, och vem skapade den?", a:"Pastis — Paul Ricard"}
+    ],
+    musik:{intro:"Trots att staden ligger långt från popvärldens metropoler har den en het musikscen — inte minst inom fransk hiphop, där en grupp härifrån räknas som pionjärer.",
+       q:"Nämn hiphopgruppen bildad här och dess frontman (solo).", a:"IAM · Akhenaton"} },
+};
+
+/* Merge: wikins resor + kuraterade lokala (lokal vinner, men svårighetsgrad hämtas från wikin) */
+Object.keys(RESOR_LOCAL).forEach(k=>{
+  if(window.RESOR_DATA && window.RESOR_DATA[k]) RESOR_LOCAL[k].svarighet = window.RESOR_DATA[k].svarighet;
+});
+const RESOR = Object.assign({}, window.RESOR_DATA||{}, RESOR_LOCAL);
+const DEFAULT_TRIO = ["marseille","rom","kiruna"];
+
+/* Specialmoment: innehållet ägs av wikin (wiki/moment/*.md → resor-data.js). Lokala kopior
+   nedan är offline-fallback; wiki-versionen vinner vid merge. Flera moment per typ stöds. */
+const MOMENT_LOCAL = {
+ "vemdar-utzon": {
+  typ:"vemdar", kort:"Vem där?", titel:"Vem där? — Jørn Utzon",
+  clues:[
+    "Som ung seglade han och drömde om havet — men det var former som liknar segel och snäckskal som skulle göra honom odödlig.",
+    "Den här danske arkitekten vann 1957 en internationell tävling som relativt okänd, men hoppade av bygget i förtid efter bråk om pengarna.",
+    "Hans mästerverk med de vita „seglen” vid en hamn på södra halvklotet stod klart 1973 och är idag ett Unescovärldsarv."
+  ],
+  answer:"Jørn Utzon",
+  bridge:"🌉 Bryggan: Jørn Utzon föddes i KÖPENHAMN och ritade operahuset i SYDNEY — två av kvällens tre resmål möts i en och samma person. Operahuset skymtade dessutom redan som ledtråd i Sydney-resan.",
+  facit:"Fakta webbverifierade: född i Köpenhamn 1918, vann Sydney-tävlingen 1957, färdigt 1973, Pritzkerpriset 2003."
+ },
+ "listan-stolklassiker": {
+  typ:"listan", kort:"Listan", titel:"Listan — Stolklassikerna",
+  amne:"Vilka fyra av dessa åtta möbelklassiker är formgivna av Arne Jacobsen?",
+  intro:"Ni minns myran och ägget från Köpenhamnsresan — men designhistorien är full av stolar med starka namn. Fyra av åtta hör till dansken Arne Jacobsen. Vilka?",
+  alternativ:[
+    {t:"Myran", ok:true, wiki:[["en","Ant (chair)"],["sv","Myran (stol)"]]},
+    {t:"Paimio", ok:false, vem:"Alvar Aalto", wiki:[["en","Paimio Chair"],["en","Paimio Sanatorium"]]},
+    {t:"Svanen", ok:true, wiki:[["en","Swan (chair)"],["sv","Svanen (fåtölj)"]]},
+    {t:"Barcelona", ok:false, vem:"Mies van der Rohe", wiki:[["en","Barcelona chair"]]},
+    {t:"Sjuan", ok:true, wiki:[["en","Model 3107 chair"],["sv","Sjuan (stol)"]]},
+    {t:"Tulpanen (Tulip)", ok:false, vem:"Eero Saarinen", wiki:[["en","Tulip chair"]]},
+    {t:"Ägget", ok:true, wiki:[["en","Egg (chair)"],["sv","Ägget (fåtölj)"]]},
+    {t:"Lamino", ok:false, vem:"Yngve Ekström", wiki:[["sv","Lamino"],["en","Yngve Ekström"]]}
+  ],
+  facit:"Arne Jacobsen ritade Myran (1952), Sjuan (1955) samt Ägget och Svanen (1958, för SAS Royal Hotel i Köpenhamn). Paimio är Alvar Aalto, Barcelona är Mies van der Rohe, Tulpanen är Eero Saarinen och fåtöljen Lamino är svensken Yngve Ekström.",
+  bridge:"🌉 Bryggan: Listan knyter tillbaka till Köpenhamnsresans tiopoängare — historien om Myran och Ägget börjar just hos Arne Jacobsen."
+ },
+ "narmast-strasbourg": {
+  typ:"narmast", kort:"Närmast vinner", titel:"Närmast vinner — Strasbourg",
+  fraga:"La Marseillaise skrevs inte i Marseille — placera staden där sången faktiskt föddes 1792: Strasbourg.",
+  target:{lat:48.5734, lon:7.7521, namn:"Strasbourg"},
+  facit:"Rouget de Lisle skrev sången i Strasbourg 1792 som „Krigssång för Rhenarmén” — den fick namnet La Marseillaise först när Marseilles frivilliga sjöng den på marschen mot Paris. Kvällens första resa pekade redan hit.",
+  bridge:"🌉 Bryggan: Marseille-resans tiopoängare gömde just denna fälla — sången som bär Marseilles namn skrevs i Strasbourg."
+ }
+};
+const MOMENT = Object.assign({}, MOMENT_LOCAL, window.MOMENT_DATA||{});
+const DEFAULT_MOMENT = ["vemdar-utzon","listan-stolklassiker","narmast-strasbourg"];
+function curMoment(){ return MOMENT[S.segs[S.seg].key]; }
+
+/* Fallback-blindkartans utsnitt och referensstäder (Europa) — används utan Leaflet */
+const NB={minLon:-12, maxLon:28, minLat:35, maxLat:62};
+const NREFS=[
+  {namn:"London", lat:51.5074, lon:-0.1278},
+  {namn:"Madrid", lat:40.4168, lon:-3.7038},
+  {namn:"Rom", lat:41.9028, lon:12.4964},
+  {namn:"Berlin", lat:52.52, lon:13.405},
+  {namn:"Stockholm", lat:59.3293, lon:18.0686},
+  {namn:"Aten", lat:37.9838, lon:23.7275}
+];
+
+/* Segmentordningen byggs dynamiskt i startMatch() utifrån valda resor och moment:
+   Resa 1 · Resa 2 · [Moment 1] · Resa 3 · [Moment 2] · [Moment 3] …  (0–flera moment) */
+function buildSegs(resaKeys, momentKeys){
+  const mseg=momentKeys.map(k=>({type:MOMENT[k].typ, key:k}));
+  const segs=[{type:"resa",key:resaKeys[0]},{type:"resa",key:resaKeys[1]}];
+  if(mseg[0]) segs.push(mseg[0]);
+  segs.push({type:"resa",key:resaKeys[2]});
+  segs.push(...mseg.slice(1));
+  return segs;
+}
+function computeMax(){
+  let m=0;
+  (S.segs||[]).forEach(seg=>{
+    if(seg.type==="resa"){ const d=RESOR[seg.key]; m+=10+(d.foljd?d.foljd.length:0)+3; }
+    else m+=3;
+  });
+  return m||60;
+}
+
+/* ================= STATE ================= */
+let S = freshState();
+function freshState(){
+  return {started:false, ended:false, seg:0, segs:[],
+    teams:[{namn:"Lag 1",p:0},{namn:"Lag 2",p:0}], run:null};
+}
+function initRun(){
+  const seg=S.segs[S.seg];
+  if(seg.type==="resa") S.run={idx:0, guesses:[null,null], phase:"travel", showFu:false, fu:{}, fuAward:{}};
+  else if(seg.type==="listan") S.run={team:null, picks:[], judged:false, bridge:false};
+  else if(seg.type==="narmast") S.run={turn:0, temp:null, marks:[null,null], revealed:false, winners:null, bridge:false};
+  else S.run={idx:0, pending:null, locked:[false,false], resolved:false, winner:null, bridge:false};
+}
+function resolvedResa(r){ return r.phase==="judge" && r.guesses.every(g=>g===null||g.judged!==null); }
+
+/* ================= ELEMENTS ================= */
+const $stage=document.getElementById('stage'), $score=document.getElementById('scoreboard'),
+      $prog=document.getElementById('progress');
+if(IS_VIEWER){
+  document.body.classList.add('viewer');
+  document.getElementById('modeTag').textContent='📺 Tittarvy'; document.getElementById('modeTag').className='tag live';
+  document.getElementById('viewerBtn').style.display='none';
+  document.getElementById('resetBtn').style.display='none';
+}
+
+/* ================= RENDER ================= */
+function render(){
+  if(!S.started){ renderStart(); syncOut(); return; }
+  if(S.ended){ renderEnd(); syncOut(); return; }
+  renderScore(); renderProgress();
+  const seg=S.segs[S.seg];
+  if(seg.type==="resa") renderResa(seg);
+  else if(seg.type==="listan") renderListan();
+  else if(seg.type==="narmast") renderNarmast();
+  else renderVem(seg);
+  syncOut();
+}
+
+function renderStart(){
+  $score.style.display='none'; $prog.style.display='none';
+  if(IS_VIEWER){
+    $stage.innerHTML=`<div class="center"><div class="kicker">Vart är vi på väg?</div>
+      <h2>Väntar på spelledaren…</h2><p class="sub">Matchen visas här när den startar.</p></div>`;
+    return;
+  }
+  const SVAR_EMOJI={"lätt":"🟢","medel":"🟡","svår":"🔴"};
+  const resaList=Object.keys(RESOR).map(k=>{const d=RESOR[k];
+    const chk=DEFAULT_TRIO.includes(k)?'checked':'';
+    return `<label class="resapick"><input type="checkbox" id="chk-${k}" ${chk} onchange="limitPicks()">
+      ${d.flagga} <b>${escapeHtml(d.namn)}</b> <span class="sv">${SVAR_EMOJI[d.svarighet]||'🟡'} ${escapeHtml(d.svarighet||'medel')}</span></label>`;
+  }).join('');
+  const TYP_EMOJI={vemdar:"👤",listan:"📋",narmast:"📍"};
+  const momentList=Object.keys(MOMENT).map(k=>{const m=MOMENT[k];
+    const chk=DEFAULT_MOMENT.includes(k)?'checked':'';
+    return `<label class="resapick"><input type="checkbox" id="chkm-${k}" ${chk}>
+      ${TYP_EMOJI[m.typ]||'🎯'} <b>${escapeHtml(m.titel||m.kort)}</b> <span class="sv">${escapeHtml(m.kort)}</span></label>`;
+  }).join('');
+  $stage.innerHTML=`<div class="center">
+    <div class="kicker">Vart är vi på väg?</div>
+    <h2>En komplett match</h2>
+    <p class="sub">Tre resor (välj nedan) · tre specialmoment (Vem där? · Listan · Närmast vinner). Appen är spelledare och poängtavla.</p>
+    <div><input id="t1" placeholder="Lag 1 namn" value="1:a klass">
+         <input id="t2" placeholder="Lag 2 namn" value="Dressinen"></div>
+    <div class="pickgrid" id="pickgrid">${resaList}</div>
+    <div class="note" id="pickNote">Välj exakt 3 resor — de spelas i vald ordning.</div>
+    <div class="pickgrid">${momentList}</div>
+    <div class="note" id="pickNoteM">Välj specialmoment (0–3, spelas mellan/efter resorna). Allt hämtas från wikin (<code>resor-data.js</code>, byggd av <code>build-resor.py</code>).</div>
+    <div style="margin-top:14px"><button class="btn-gold" style="padding:13px 26px;font-size:16px" onclick="startMatch()">▶ Starta matchen</button></div>
+    <div class="pill">📺 Öppna „Tittarvy” i ett nytt fönster och lägg på en andra skärm/projektor för deltagarna.</div>
+  </div>`;
+}
+function pickedResor(){
+  return Object.keys(RESOR).filter(k=>{const el=document.getElementById('chk-'+k); return el&&el.checked;});
+}
+function limitPicks(){
+  const n=pickedResor().length, note=document.getElementById('pickNote');
+  if(note) note.innerHTML = n===3 ? 'Tre resor valda ✔' : `Välj exakt 3 resor (${n} valda).`;
+}
+function pickedMoment(){
+  return Object.keys(MOMENT).filter(k=>{const el=document.getElementById('chkm-'+k); return el&&el.checked;});
+}
+function startMatch(){
+  const sel=pickedResor();
+  if(sel.length!==3){ limitPicks(); return; }
+  const mom=pickedMoment().slice(0,3);
+  S.teams[0].namn=(document.getElementById('t1').value.trim()||"Lag 1");
+  S.teams[1].namn=(document.getElementById('t2').value.trim()||"Lag 2");
+  S.segs=buildSegs(sel,mom);
+  S.started=true; S.seg=0; initRun(); render();
+}
+
+function renderScore(){
+  $score.style.display='grid';
+  $score.innerHTML=S.teams.map((t,i)=>`
+    <div class="team">
+      <h3>${escapeHtml(t.namn)}</h3>
+      <div class="pts">${t.p}<span style="font-size:14px;color:var(--muted)"> p</span></div>
+      ${IS_VIEWER?'':`<div class="adj">
+        <button onclick="adj(${i},-1)">−1</button>
+        <button onclick="adj(${i},1)">+1</button>
+        <button onclick="adj(${i},3)">+3</button></div>`}
+    </div>${i===0?`<div class="vs">MOT<span class="max">max ${computeMax()}</span></div>`:''}`).join('');
+}
+function adj(i,d){ if(IS_VIEWER)return; S.teams[i].p=Math.max(0,S.teams[i].p+d); render(); }
+
+function renderProgress(){
+  $prog.style.display='flex';
+  let rn=0;
+  $prog.innerHTML=S.segs.map((seg,i)=>{
+    let label;
+    if(IS_VIEWER){ label = seg.type==="resa" ? ('Resa '+(++rn)) : 'Specialmoment'; } // dölj resmål för tittarna
+    else { label = seg.type==="resa"?RESOR[seg.key].namn : (MOMENT[seg.key]?MOMENT[seg.key].kort:seg.type); }
+    const cls=i<S.seg?'done':(i===S.seg?'current':'');
+    return `<span class="seg-dot ${cls}">${i+1}. ${label}</span>`;
+  }).join('')+`<span class="seg-dot ${S.ended?'done':''}">🏁 Slut</span>`;
+}
+
+/* --------- RESA --------- */
+function renderResa(seg){
+  const d=RESOR[seg.key], r=S.run, judgeP=(r.phase==="judge");
+  const ladder=d.clues.map((c,i)=>{
+    const shown=i<=r.idx||judgeP, cur=(i===r.idx&&!judgeP);
+    const badges=r.guesses.map((g,ti)=> g&&g.level===c.p
+      ? `<span class="badge ${g.judged===true?'ok':g.judged===false?'no':''}">🔒 ${escapeHtml(S.teams[ti].namn)}${g.judged===true?' ✔ +'+g.level+'p':g.judged===false?' ✗':''}</span>`
+      : '').join('');
+    return `<div class="rung ${shown?'shown':''} ${cur?'current':''}">
+      <div class="row"><div class="chip">${c.p}</div>
+      <p>${shown?escapeHtml(c.t):'<span class="hidden-txt">— dold ledtråd —</span>'}</p></div>
+      ${badges?`<div class="badges">${badges}</div>`:''}</div>`;
+  }).join('');
+
+  let mid='';
+  if(!judgeP){
+    const curP=d.clues[r.idx].p;
+    if(!IS_VIEWER){
+      mid=`<div class="buzz">
+        ${S.teams.map((t,i)=>`<button class="btn-red buzzbtn" ${r.guesses[i]?'disabled':''} onclick="brake(${i})">🚨 ${escapeHtml(t.namn)} drar i nödbromsen · ${curP} p</button>`).join('')}
+      </div>
+      <div class="controls">
+        <button class="btn" ${r.idx>=d.clues.length-1?'disabled':''} onclick="nextClue()">Nästa ledtråd ↓</button>
+        <button class="btn-gold" onclick="toJudge()">Avsluta resan &amp; rätta →</button>
+      </div>
+      <div class="note">Ett lag som drar låser sin gissning på den nivån — men rättas först på slutet. Motståndaren fortsätter på lägre nivå tills båda gissat.</div>`;
+    } else {
+      mid=`<div class="pill">Aktuell nivå: <b style="color:var(--gold)">${curP} p</b> — lagen reser vidare…</div>`;
+    }
+  } else {
+    // JUDGE
+    const pend=r.guesses.map((g,i)=> (g&&g.judged===null)
+      ? `<div class="judge-row"><div class="who">${escapeHtml(S.teams[i].namn)} gissade på <b>${g.level} p</b></div>
+         ${IS_VIEWER?'<span class="pill">inväntar rättning…</span>':`<button class="btn-green" onclick="judge(${i},true)">✔ Rätt (+${g.level}p)</button>
+         <button class="btn-red" onclick="judge(${i},false)">✗ Fel</button>`}</div>` : '').join('');
+    const noGuess=r.guesses.map((g,i)=> g===null? `<div class="judge-row"><div class="who">${escapeHtml(S.teams[i].namn)} avstod — 0 p</div></div>`:'').join('');
+    if(pend||noGuess) mid=`<div class="panel"><h4>Rätta svaren</h4>${pend}${noGuess}</div>`;
+  }
+
+  const facit = judgeP ? `<div class="facit">
+      <h4>✔ Facit: ${d.flagga} ${escapeHtml(d.namn)}, ${escapeHtml(d.land)}</h4>
+      <div class="why">${escapeHtml(d.why)}</div></div>` : '';
+
+  const fu = (judgeP&&resolvedResa(r)) ? renderFu(d,r) : '';
+
+  $stage.innerHTML=`
+    <div class="kicker">Resa ${resaNr()} · Vart är vi på väg?</div>
+    <h2>Ledtrådsstege</h2>
+    <div class="sub">Dra i nödbromsen på den nivå ni vågar. Ju högre upp, desto fler poäng — men mindre information.</div>
+    ${IS_VIEWER?'':`<div class="hostfacit">🔒 Facit (endast spelledare): ${d.flagga} ${escapeHtml(d.namn)}, ${escapeHtml(d.land)}</div>`}
+    <div class="ladder">${ladder}</div>
+    ${mid}${facit}${fu}
+    <div class="foot"><span class="pill">${judgeP?'Rättning':'Resa pågår'}</span>
+      ${IS_VIEWER?'':`<button class="btn-gold" ${resolvedResa(r)?'':'disabled'} onclick="nextSegment()">Nästa moment →</button>`}</div>`;
+}
+function resaNr(){ let n=0; for(let i=0;i<=S.seg;i++){ if(S.segs[i].type==='resa') n++; } return n; }
+
+function renderFu(d,r){
+  const items=d.foljd.map((q,i)=>fuCard(q,String(i),r)).join('');
+  return `<div class="fu">
+    <h4>Följdfrågor</h4>${items}
+    <h4>🎵 Musikfråga</h4>${fuCard(d.musik,'m',r)}
+    ${IS_VIEWER?'':'<div class="note">Båda lagen svarar (t.ex. skriftligt) innan svaret visas — båda kan få poängen.</div>'}</div>`;
+}
+function fuVal(key){ return key==='m'?3:1; }
+/* Båda lagen svarar (skriftligt) på varje följdfråga — båda kan alltså få poängen. */
+function fuCard(q,key,r){
+  const shown=!!r.fu[key];
+  const val=fuVal(key);
+  const aw=(r.fuAward&&r.fuAward[key])||[false,false];
+  let awardHtml='';
+  if(shown){
+    const got=S.teams.map((t,i)=>aw[i]?escapeHtml(t.namn):null).filter(Boolean);
+    if(!IS_VIEWER){
+      awardHtml = `<div class="awardrow">Rätt svar (+${val} p vardera):
+        ${S.teams.map((t,i)=>`<button class="${aw[i]?'btn-ghost':'btn-green'}" ${aw[i]?'disabled':''}
+          onclick="award('${key}',${i})">${aw[i]?'✔ ':''}${escapeHtml(t.namn)}</button>`).join('')}</div>`;
+    }
+    if(got.length) awardHtml+=`<div class="awarded">✔ +${val} p → ${got.join(' & ')}</div>`;
+  }
+  return `<div class="q">
+    ${q.intro?`<div class="intro">${escapeHtml(q.intro)}</div>`:''}
+    <div class="qt">${escapeHtml(q.q)}</div>
+    <div class="ans ${shown?'show':''}">➜ ${escapeHtml(q.a)}</div>
+    ${IS_VIEWER?'':`<button class="btn" onclick="toggleFu('${key}')">${shown?'Dölj':'Visa'} svar</button>`}
+    ${awardHtml}
+  </div>`;
+}
+function toggleFu(key){ if(IS_VIEWER)return; S.run.fu[key]=!S.run.fu[key]; render(); }
+function award(key,team){ if(IS_VIEWER)return; const r=S.run; if(!r.fuAward) r.fuAward={};
+  if(!r.fuAward[key]) r.fuAward[key]=[false,false];
+  if(r.fuAward[key][team]) return;
+  r.fuAward[key][team]=true; S.teams[team].p+=fuVal(key); render(); }
+
+/* resa actions */
+function brake(team){
+  if(IS_VIEWER)return; const r=S.run; if(r.phase!=='travel'||r.guesses[team])return;
+  const d=RESOR[S.segs[S.seg].key];
+  r.guesses[team]={level:d.clues[r.idx].p, judged:null};
+  const other=1-team;
+  if(r.guesses[other]===null){ if(r.idx<d.clues.length-1) r.idx++; }
+  else { r.phase='judge'; }
+  render();
+}
+function nextClue(){ if(IS_VIEWER)return; const r=S.run,d=RESOR[S.segs[S.seg].key];
+  if(r.phase==='travel'&&r.idx<d.clues.length-1) r.idx++; render(); }
+function toJudge(){ if(IS_VIEWER)return; S.run.phase='judge'; render(); }
+function judge(team,correct){ if(IS_VIEWER)return; const g=S.run.guesses[team]; if(!g||g.judged!==null)return;
+  g.judged=correct; if(correct) S.teams[team].p+=g.level; render(); }
+
+/* --------- VEM DÄR --------- */
+function renderVem(seg){
+  const r=S.run, d=curMoment();
+  const clues=d.clues.map((c,i)=>{
+    const shown=i<=r.idx||r.resolved, cur=(i===r.idx&&!r.resolved);
+    return `<div class="rung ${shown?'shown':''} ${cur?'current':''}">
+      <div class="row"><div class="chip">${i+1}</div>
+      <p>${shown?escapeHtml(c):'<span class="hidden-txt">— dold ledtråd —</span>'}</p></div></div>`;
+  }).join('');
+
+  let mid='';
+  if(!r.resolved){
+    if(r.pending!==null){
+      mid = IS_VIEWER
+        ? `<div class="panel"><h4>${escapeHtml(S.teams[r.pending].namn)} svarar…</h4></div>`
+        : `<div class="panel"><h4>${escapeHtml(S.teams[r.pending].namn)} svarar — stämmer det?</h4>
+            <div class="judge-row"><div class="who">Rätt person?</div>
+            <button class="btn-green" onclick="resolveVem(true)">✔ Rätt (+3p)</button>
+            <button class="btn-red" onclick="resolveVem(false)">✗ Fel</button></div></div>`;
+    } else if(!IS_VIEWER){
+      mid=`<div class="buzz">
+        ${S.teams.map((t,i)=>`<button class="btn-red buzzbtn" ${r.locked[i]?'disabled':''} onclick="brakeVem(${i})">🚨 ${escapeHtml(t.namn)} svarar · 3 p</button>`).join('')}
+      </div><div class="controls">
+        <button class="btn" ${r.idx>=curMoment().clues.length-1?'disabled':''} onclick="nextVem()">Nästa ledtråd ↓</button>
+        <button class="btn-gold" onclick="giveUpVem()">Ingen svarar → visa svar</button></div>`;
+    }
+  }
+  const facit=r.resolved?`<div class="facit"><h4>✔ Svar: ${escapeHtml(curMoment().answer)}</h4>
+      ${r.winner!==null?`<div>${escapeHtml(S.teams[r.winner].namn)} tog 3 poäng.</div>`:`<div>Ingen tog momentet.</div>`}
+      <div class="why">${escapeHtml(curMoment().facit||'')}</div>
+      ${IS_VIEWER?(r.bridge?bridgeHtml():''):`<div style="margin-top:12px"><button class="btn-gold" onclick="showBridge()">${r.bridge?'✓ ':''}Visa bryggan till resmålen</button></div>${r.bridge?bridgeHtml():''}`}
+    </div>`:'';
+
+  $stage.innerHTML=`<div class="kicker">Specialmoment</div>
+    <h2>Vem där?</h2>
+    <div class="sub">Ledtrådar pekar mot en person. Först att svara rätt får 3 poäng.</div>
+    ${IS_VIEWER?'':`<div class="hostfacit">🔒 Facit (endast spelledare): ${escapeHtml(curMoment().answer)}</div>`}
+    <div class="ladder">${clues}</div>${mid}${facit}
+    <div class="foot"><span class="pill">3 poäng</span>
+      ${IS_VIEWER?'':`<button class="btn-gold" ${r.resolved?'':'disabled'} onclick="nextSegment()">Nästa moment →</button>`}</div>`;
+}
+function bridgeHtml(){ return `<div class="bridge">${escapeHtml(curMoment().bridge)}</div>`; }
+function brakeVem(team){ if(IS_VIEWER)return; const r=S.run; if(r.resolved||r.locked[team]||r.pending!==null)return; r.pending=team; render(); }
+function resolveVem(correct){ if(IS_VIEWER)return; const r=S.run, t=r.pending; if(t===null)return; r.pending=null;
+  if(correct){ S.teams[t].p+=3; r.resolved=true; r.winner=t; }
+  else { r.locked[t]=true; if(r.locked[0]&&r.locked[1]){ r.resolved=true; r.winner=null; } else if(r.idx<curMoment().clues.length-1) r.idx++; }
+  render(); }
+function nextVem(){ if(IS_VIEWER)return; const r=S.run; if(!r.resolved&&r.pending===null&&r.idx<curMoment().clues.length-1) r.idx++; render(); }
+function giveUpVem(){ if(IS_VIEWER)return; S.run.resolved=true; S.run.winner=null; render(); }
+function showBridge(){ if(IS_VIEWER)return; S.run.bridge=true; render(); }
+
+/* --------- LISTAN --------- */
+/* Bilder hämtas live från Wikipedias REST-API (CORS-öppet). Faller tystnadsfullt
+   tillbaka till textkort utan bild om offline eller om artikeln saknar bild. */
+const IMGCACHE={};
+function loadListanImgs(){
+  Object.keys(MOMENT).forEach(mk=>{
+    const m=MOMENT[mk];
+    if(m.typ!=='listan'||!m.alternativ) return;
+    m.alternativ.forEach((o,i)=>{
+      const ck=mk+':'+i;
+      if(!o.wiki || IMGCACHE[ck]) return;
+      (function tryNext(j){
+        if(j>=o.wiki.length) return;
+        const lang=o.wiki[j][0], title=o.wiki[j][1];
+        fetch('https://'+lang+'.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(title.replace(/ /g,'_')))
+          .then(res=>res.ok?res.json():Promise.reject())
+          .then(d=>{
+            if(d.thumbnail&&d.thumbnail.source){
+              IMGCACHE[ck]=d.thumbnail.source;
+              if(S.started&&!S.ended&&S.segs[S.seg]&&S.segs[S.seg].type==='listan') render();
+            } else tryNext(j+1);
+          })
+          .catch(()=>tryNext(j+1));
+      })(0);
+    });
+  });
+}
+loadListanImgs();
+
+function renderListan(){
+  const r=S.run;
+  let head='';
+  if(r.team===null){
+    head = IS_VIEWER
+      ? `<div class="pill">Spelledaren väljer vilket lag som tar sig an Listan…</div>`
+      : `<div class="panel"><h4>Vilket lag spelar Listan?</h4>
+          <div class="sub" style="margin:0 0 10px">Traditionen: laget som ligger under. Välj fyra alternativ — alla fyra rätt ger 3 p.</div>
+          <div class="buzz">${S.teams.map((t,i)=>`<button class="btn-gold buzzbtn" onclick="pickListanTeam(${i})">${escapeHtml(t.namn)}${trailing()===i?' (ligger under)':''}</button>`).join('')}</div>
+        </div>`;
+  } else {
+    head=`<div class="pill">Spelar: <b style="color:var(--gold)">${escapeHtml(S.teams[r.team].namn)}</b> · valda: ${r.picks.length}/4</div>`;
+  }
+  const grid = curMoment().alternativ.map((o,i)=>{
+    const picked=r.picks.includes(i);
+    let cls='opt', mark='';
+    if(r.judged){
+      if(picked&&o.ok){cls+=' rightpick';mark='✔';}
+      else if(picked&&!o.ok){cls+=' wrongpick';mark=`✗ ${o.vem}`;}
+      else if(!picked&&o.ok){cls+=' missed';mark='(rätt svar)';}
+      else if(!picked&&!o.ok){mark=o.vem;}
+    } else if(picked) cls+=' picked';
+    const clickable=!IS_VIEWER&&r.team!==null&&!r.judged;
+    const ck=S.segs[S.seg].key+':'+i;
+    const img=IMGCACHE[ck]?`<img src="${IMGCACHE[ck]}" alt="" onerror="this.style.display='none'">`:'';
+    return `<button class="${cls}" ${clickable?`onclick="toggleListan(${i})"`:'disabled style="cursor:default"'}>
+      ${img}${escapeHtml(o.t)} <span class="mark">${r.judged?escapeHtml(mark):(picked?'●':'')}</span></button>`;
+  }).join('');
+  let after='';
+  if(r.judged){
+    const allRight=r.picks.length===4&&r.picks.every(i=>curMoment().alternativ[i].ok);
+    after=`<div class="facit"><h4>${allRight?'✔ Alla fyra rätt — 3 poäng till '+escapeHtml(S.teams[r.team].namn)+'!':'✗ Inte alla rätt — 0 poäng.'}</h4>
+      <div class="why">${escapeHtml(curMoment().facit)}</div>
+      ${IS_VIEWER?(r.bridge?`<div class="bridge">${escapeHtml(curMoment().bridge)}</div>`:''):`<div style="margin-top:12px"><button class="btn-gold" onclick="showBridgeGeneric()">${r.bridge?'✓ ':''}Visa bryggan</button></div>${r.bridge?`<div class="bridge">${escapeHtml(curMoment().bridge)}</div>`:''}`}</div>`;
+  } else if(!IS_VIEWER&&r.team!==null){
+    after=`<div class="controls"><button class="btn-gold" ${r.picks.length===4?'':'disabled'} onclick="judgeListan()">Rätta Listan →</button></div>`;
+  }
+  $stage.innerHTML=`<div class="kicker">Specialmoment</div>
+    <h2>Listan</h2>
+    <div class="sub">${escapeHtml(curMoment().intro)}</div>
+    <div class="q"><div class="qt">${escapeHtml(curMoment().amne)}</div></div>
+    ${head}<div class="optgrid">${grid}</div>${after}
+    <div class="foot"><span class="pill">3 poäng — allt eller inget</span>
+      ${IS_VIEWER?'':`<button class="btn-gold" ${r.judged?'':'disabled'} onclick="nextSegment()">Nästa moment →</button>`}</div>`;
+}
+function trailing(){ return S.teams[0].p<=S.teams[1].p?0:1; }
+function pickListanTeam(i){ if(IS_VIEWER)return; S.run.team=i; render(); }
+function toggleListan(i){ if(IS_VIEWER)return; const r=S.run; if(r.judged)return;
+  const at=r.picks.indexOf(i);
+  if(at>=0) r.picks.splice(at,1); else if(r.picks.length<4) r.picks.push(i);
+  render(); }
+function judgeListan(){ if(IS_VIEWER)return; const r=S.run; if(r.picks.length!==4||r.judged)return;
+  r.judged=true;
+  if(r.picks.every(i=>curMoment().alternativ[i].ok)) S.teams[r.team].p+=3;
+  render(); }
+function showBridgeGeneric(){ if(IS_VIEWER)return; S.run.bridge=true; render(); }
+
+/* --------- NÄRMAST VINNER --------- */
+function projXY(lat,lon){ const b=NB;
+  return {x:(lon-b.minLon)/(b.maxLon-b.minLon)*100, y:(b.maxLat-lat)/(b.maxLat-b.minLat)*100}; }
+function unproj(xPct,yPct){ const b=NB;
+  return {lon:b.minLon+xPct/100*(b.maxLon-b.minLon), lat:b.maxLat-yPct/100*(b.maxLat-b.minLat)}; }
+function havKm(a,b){ const R=6371,rad=x=>x*Math.PI/180;
+  const dLat=rad(b.lat-a.lat), dLon=rad(b.lon-a.lon);
+  const h=Math.sin(dLat/2)**2+Math.cos(rad(a.lat))*Math.cos(rad(b.lat))*Math.sin(dLon/2)**2;
+  return Math.round(2*R*Math.asin(Math.sqrt(h))); }
+let NVIEW={center:[48,10],zoom:4}; let NMAP=null;
+const HAS_LEAFLET=()=>typeof L!=='undefined';
+function initNarmastMap(){
+  const el=document.getElementById('lmap');
+  if(!el||!HAS_LEAFLET()) return;
+  if(NMAP){ try{NMAP.remove();}catch(e){} NMAP=null; }
+  const r=S.run;
+  NMAP=L.map(el,{minZoom:3,maxZoom:8,worldCopyJump:true}).setView(NVIEW.center,NVIEW.zoom);
+  // Etikettfria kartplattor = digital blindkarta (inga ortnamn som avslöjar målet)
+  L.tileLayer('https://basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',
+    {attribution:'© OpenStreetMap-bidragsgivare © CARTO', subdomains:'abcd'}).addTo(NMAP);
+  NMAP.on('moveend',()=>{ const c=NMAP.getCenter(); NVIEW={center:[c.lat,c.lng],zoom:NMAP.getZoom()}; });
+  if(!IS_VIEWER&&!r.revealed&&r.turn<2){
+    NMAP.on('click',e=>{ r.temp={lat:e.latlng.lat,lon:e.latlng.lng};
+      // rita om bara pinnen, inte hela vyn — behåller kartläget mjukt
+      if(NMAP._tempPin) NMAP.removeLayer(NMAP._tempPin);
+      NMAP._tempPin=L.marker([r.temp.lat,r.temp.lon]).addTo(NMAP)
+        .bindTooltip(S.teams[r.turn].namn+'?',{permanent:true,direction:'top'});
+      const btn=document.getElementById('lockBtn'); if(btn) btn.disabled=false;
+      syncOut();
+    });
+    if(r.temp){ NMAP._tempPin=L.marker([r.temp.lat,r.temp.lon]).addTo(NMAP)
+      .bindTooltip(S.teams[r.turn].namn+'?',{permanent:true,direction:'top'}); }
+  }
+  if(r.revealed){
+    r.marks.forEach((m,i)=>{ if(!m)return;
+      L.marker([m.lat,m.lon]).addTo(NMAP)
+        .bindTooltip(escapeHtml(S.teams[i].namn)+' · '+havKm(m,curMoment().target)+' km',{permanent:true,direction:'top'}); });
+    L.circleMarker([curMoment().target.lat,curMoment().target.lon],
+      {radius:9,color:'#f4c542',fillColor:'#f4c542',fillOpacity:.9}).addTo(NMAP)
+      .bindTooltip('★ '+escapeHtml(curMoment().target.namn),{permanent:true,direction:'top'});
+  }
+  setTimeout(()=>{ try{NMAP.invalidateSize();}catch(e){} },50);
+}
+function renderNarmast(){
+  const r=S.run;
+  let map;
+  if(HAS_LEAFLET()){
+    map=`<div id="lmap" class="mapbox ${(!IS_VIEWER&&!r.revealed&&r.turn<2)?'':'locked'}"></div>
+      <div class="note">Scrolla/zooma fritt — kartan är avsiktligt utan ortnamn. Klicka för att sätta ut pinnen, dra runt och klicka igen för att flytta den.</div>`;
+  } else {
+    // Offline-fallback: rutnätsblindkarta med referensstäder
+    const refs=NREFS.map(c=>{ const p=projXY(c.lat,c.lon);
+      return `<div class="refdot" style="left:${p.x}%;top:${p.y}%"><div class="d"></div><div class="l">${escapeHtml(c.namn)}</div></div>`; }).join('');
+    let markers='';
+    if(!IS_VIEWER&&r.temp){ const p=projXY(r.temp.lat,r.temp.lon);
+      markers+=`<div class="marker" style="left:${p.x}%;top:${p.y}%">📍<div class="ml">${escapeHtml(S.teams[r.turn].namn)}?</div></div>`; }
+    if(r.revealed){
+      r.marks.forEach((m,i)=>{ if(!m)return; const p=projXY(m.lat,m.lon);
+        markers+=`<div class="marker" style="left:${p.x}%;top:${p.y}%">📍<div class="ml">${escapeHtml(S.teams[i].namn)} · ${havKm(m,curMoment().target)} km</div></div>`; });
+      const tp=projXY(curMoment().target.lat,curMoment().target.lon);
+      markers+=`<div class="target" style="left:${tp.x}%;top:${tp.y}%">★</div>`;
+    }
+    const clickable=!IS_VIEWER&&!r.revealed&&r.turn<2;
+    map=`<div class="mapbox ${clickable?'':'locked'}" id="mapbox" ${clickable?`onclick="mapClick(event)"`:''}>
+      <div class="mapgrid"></div>${refs}${markers}</div>
+      <div class="note">Offline-läge: förenklad blindkarta (Leaflet kunde inte laddas).</div>`;
+  }
+  let ctrl='';
+  if(!r.revealed){
+    if(IS_VIEWER){
+      ctrl=`<div class="pill">${r.turn<2?escapeHtml(S.teams[r.turn].namn)+' placerar sin markering i hemlighet…':'Båda lagen har låst — inväntar avslöjande…'}</div>`;
+    } else if(r.turn<2){
+      ctrl=`<div class="controls">
+        <span class="pill">Tur: <b style="color:var(--gold)">${escapeHtml(S.teams[r.turn].namn)}</b> — klicka på kartan${r.marks[0]&&r.turn===1?' (första lagets markering är dold)':''}</span>
+        <button class="btn-gold" id="lockBtn" ${r.temp?'':'disabled'} onclick="lockMark()">Lås ${escapeHtml(S.teams[r.turn].namn)}:s gissning 🔒</button></div>`;
+    } else {
+      ctrl=`<div class="controls"><button class="btn-gold" onclick="revealNarmast()">Avslöja markeringar &amp; rätta →</button></div>`;
+    }
+  }
+  let facit='';
+  if(r.revealed){
+    const txt = r.winners===null ? 'Ingen giltig markering.'
+      : r.winners.length===2 ? 'Exakt lika långt — båda lagen får 3 p!'
+      : escapeHtml(S.teams[r.winners[0]].namn)+' var närmast och tar 3 poäng!';
+    facit=`<div class="facit"><h4>★ ${escapeHtml(curMoment().target.namn)} — ${txt}</h4>
+      <div class="why">${escapeHtml(curMoment().facit)}</div>
+      ${IS_VIEWER?(r.bridge?`<div class="bridge">${escapeHtml(curMoment().bridge)}</div>`:''):`<div style="margin-top:12px"><button class="btn-gold" onclick="showBridgeGeneric()">${r.bridge?'✓ ':''}Visa bryggan</button></div>${r.bridge?`<div class="bridge">${escapeHtml(curMoment().bridge)}</div>`:''}`}</div>`;
+  }
+  $stage.innerHTML=`<div class="kicker">Specialmoment</div>
+    <h2>Närmast vinner</h2>
+    <div class="sub">${escapeHtml(curMoment().fraga)} Laget vars markering hamnar närmast får 3 poäng.</div>
+    ${IS_VIEWER?'':`<div class="hostfacit">🔒 Facit (endast spelledare): ★ ${escapeHtml(curMoment().target.namn)}</div>`}
+    ${map}${ctrl}${facit}
+    <div class="foot"><span class="pill">3 poäng</span>
+      ${IS_VIEWER?'':`<button class="btn-gold" ${r.revealed?'':'disabled'} onclick="nextSegment()">Nästa moment →</button>`}</div>`;
+  if(HAS_LEAFLET()) setTimeout(initNarmastMap,0);
+}
+function mapClick(ev){ if(IS_VIEWER)return; const r=S.run; if(r.revealed||r.turn>=2)return;
+  const box=document.getElementById('mapbox').getBoundingClientRect();
+  const xPct=(ev.clientX-box.left)/box.width*100, yPct=(ev.clientY-box.top)/box.height*100;
+  r.temp=unproj(xPct,yPct); render(); }
+function lockMark(){ if(IS_VIEWER)return; const r=S.run; if(!r.temp)return;
+  r.marks[r.turn]=r.temp; r.temp=null; r.turn++; render(); }
+function revealNarmast(){ if(IS_VIEWER)return; const r=S.run; if(r.revealed)return;
+  r.revealed=true;
+  const d=r.marks.map(m=>m?havKm(m,curMoment().target):Infinity);
+  if(d[0]===Infinity&&d[1]===Infinity){ r.winners=null; }
+  else if(d[0]===d[1]){ r.winners=[0,1]; S.teams[0].p+=3; S.teams[1].p+=3; }
+  else { const w=d[0]<d[1]?0:1; r.winners=[w]; S.teams[w].p+=3; }
+  render(); }
+
+/* --------- NAV / SLUT --------- */
+function nextSegment(){ if(IS_VIEWER)return; if(S.seg<S.segs.length-1){ S.seg++; initRun(); render(); } else { S.ended=true; render(); } }
+function renderEnd(){
+  $prog.style.display='none'; renderScore();
+  const [a,b]=S.teams; const who=a.p>b.p?a.namn:(b.p>a.p?b.namn:null);
+  $stage.innerHTML=`<div class="center"><div class="kicker">Slutställning</div>
+    ${who?`<div class="winner">🏆 ${escapeHtml(who)}</div><p class="sub">vinner matchen!</p>`:`<div class="winner">Oavgjort!</div>`}
+    <div style="font-size:18px;margin:14px 0">${escapeHtml(a.namn)}: <b>${a.p} p</b> &nbsp;·&nbsp; ${escapeHtml(b.namn)}: <b>${b.p} p</b></div>
+    ${IS_VIEWER?'':`<button class="btn-gold" style="padding:12px 24px" onclick="resetMatch()">↺ Spela igen</button>`}
+    <div class="pill">Prototyp — nästa: ljud till musikfrågan, hosting/fjärrdelning, automatisk facitmatchning.</div></div>`;
+}
+function resetMatch(){ if(IS_VIEWER)return; S=freshState(); render(); }
+
+/* ================= TITTARVY-SYNK ================= */
+function openViewer(){
+  if(IS_VIEWER)return;
+  viewerWin=window.open(location.href.split('#')[0]+'#tittare','pasparet_tittarvy','width=980,height=760');
+  setTimeout(syncOut,400);
+}
+function syncOut(){
+  if(IS_VIEWER) return;
+  if(viewerWin && !viewerWin.closed){
+    try{ viewerWin.postMessage({type:'state', state:JSON.parse(JSON.stringify(S))}, '*'); }catch(e){}
+  }
+}
+if(IS_VIEWER){
+  window.addEventListener('message', e=>{ if(e.data&&e.data.type==='state'){ S=e.data.state; render(); }});
+  if(window.opener){ try{ window.opener.postMessage({type:'ready'},'*'); }catch(e){} }
+} else {
+  window.addEventListener('message', e=>{ if(e.data&&e.data.type==='ready'){ syncOut(); }});
+}
+
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+render();
+</script>
+</body>
+</html>
