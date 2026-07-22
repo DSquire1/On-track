@@ -23,8 +23,14 @@ respektive Wikipedia) och har offline-fallback.
 ## Innehåll
 
 Spelinnehållet ligger i `resor-data.js` och genereras från en lokal kunskapsbas (ingår ej i
-repot). Tittarvyn synkas i nuläget mellan fönster på samma dator; fjärrsynk till mobiler är
-planerad.
+repot).
+
+## Fjärrtittarvy på deltagarnas mobiler (valfritt)
+
+Utan konfiguration synkas tittarvyn mellan fönster på samma dator. För att deltagare ska kunna
+följa matchen live i sina mobiler: skapa ett gratis Firebase-projekt med Realtime Database,
+kopiera `firebase-config.example.js` till `firebase-config.js`, fyll i dina värden och ladda
+upp filen. Spelledarvyn visar då en rumskod (📡) — klicka för att kopiera tittarlänken.
 
 ## Licens
 

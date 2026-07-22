@@ -6,6 +6,10 @@
 <title>OnTrack — järnvägsquiz (inofficiellt fan-projekt)</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<!-- Fjärrsynk (valfri): skapa firebase-config.js från firebase-config.example.js så aktiveras den. -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
 <style>
   :root{
     --bg:#0b1424; --bg2:#111f38; --panel:#16294a; --panel2:#1d3560;
@@ -142,6 +146,7 @@
     <div class="logo">OnTrack <span class="rail">══</span></div>
     <span class="tag">Inofficiellt fan-projekt · ej anslutet till SVT</span>
     <span class="tag" id="modeTag">Spelledarvy</span>
+    <span class="tag" id="rumTag" style="display:none"></span>
     <div class="spacer"></div>
     <button class="btn" id="viewerBtn" onclick="openViewer()">📺 Öppna tittarvy</button>
     <button class="btn-ghost" id="resetBtn" onclick="resetMatch()">↺ Börja om</button>
@@ -156,6 +161,31 @@
 /* ================= VY ================= */
 const IS_VIEWER = location.hash.indexOf('tittare')>=0;
 let viewerWin = null;
+
+/* ===== FJÄRRSYNK (Firebase Realtime Database — aktiveras av firebase-config.js) =====
+   Spelledaren skriver hela spelläget till rum/<KOD>/state; tittare (t.ex. mobiler som öppnat
+   dellänken) prenumererar och renderar. Utan config fungerar allt som förut, lokalt. */
+let FDB=null, RUM=null;
+(function initFirebase(){
+  if(typeof firebase==='undefined' || !window.FIREBASE_CONFIG) return;
+  try{
+    firebase.initializeApp(window.FIREBASE_CONFIG);
+    const p=new URLSearchParams(location.search);
+    RUM=(p.get('rum')||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);
+    if(!RUM && !IS_VIEWER){
+      RUM=Array.from({length:4},()=>String.fromCharCode(65+Math.floor(Math.random()*26))).join('');
+    }
+    if(!RUM) return;
+    FDB=firebase.database().ref('rum/'+RUM+'/state');
+    if(IS_VIEWER){
+      FDB.on('value',snap=>{ const v=snap.val();
+        if(v){ try{ S=JSON.parse(v); render(); }catch(e){} } });
+    }
+  }catch(e){ FDB=null; }
+})();
+function viewerLink(){
+  return RUM ? location.origin+location.pathname+'?rum='+RUM+'#tittare' : null;
+}
 
 /* ================= SPELDATA ================= */
 /* Kuraterade versioner (med kuriosa-intron och berättar-facit). Resor från wikin
@@ -764,6 +794,7 @@ function syncOut(){
   if(viewerWin && !viewerWin.closed){
     try{ viewerWin.postMessage({type:'state', state:JSON.parse(JSON.stringify(S))}, '*'); }catch(e){}
   }
+  if(FDB){ try{ FDB.set(JSON.stringify(S)); }catch(e){} }
 }
 if(IS_VIEWER){
   window.addEventListener('message', e=>{ if(e.data&&e.data.type==='state'){ S=e.data.state; render(); }});
@@ -773,6 +804,19 @@ if(IS_VIEWER){
 }
 
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* Rumsknapp i headern: visa rumskod + kopiera delbar tittarlänk till mobilerna */
+if(FDB && !IS_VIEWER){
+  const t=document.getElementById('rumTag');
+  const idle=()=>{ t.innerHTML='📡 Rum '+RUM+' · kopiera tittarlänk'; };
+  t.style.display=''; t.style.cursor='pointer'; idle();
+  t.onclick=()=>{
+    const link=viewerLink();
+    if(navigator.clipboard){ navigator.clipboard.writeText(link); t.textContent='✔ Länk kopierad — dela till mobilerna'; }
+    else { prompt('Kopiera tittarlänken:', link); }
+    setTimeout(idle,3000);
+  };
+}
 render();
 </script>
 </body>
