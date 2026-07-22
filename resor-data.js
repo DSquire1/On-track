@@ -134,6 +134,73 @@ window.RESOR_DATA = {
    "a": "Dan Andersson · Hootenanny Singers"
   }
  },
+ "kapstaden": {
+  "namn": "Kapstaden",
+  "land": "Sydafrika",
+  "flagga": "🚩",
+  "svarighet": "medel",
+  "avsnitt": "Genererad (ej från sändning)",
+  "clues": [
+   {
+    "p": 10,
+    "t": "En portugis rundade vår udde 1488 och kallade den Stormarnas udde — men kungen döpte om den till något mer hoppfullt. Sjöfarare kallade staden \"havens värdshus\"."
+   },
+   {
+    "p": 8,
+    "t": "Från ett rådhus balkong höll en nyss frigiven fånge sitt första tal 1990, efter arton år på en ö utanför staden."
+   },
+   {
+    "p": 6,
+    "t": "Ett platt bord av ett berg vakar över staden — ett av naturens sju nya underverk — och varje middag skjuts en kanon av på Signalkullen."
+   },
+   {
+    "p": 4,
+    "t": "1652 anlade Jan van Riebeeck en proviantstation här åt Ostindiska kompaniet — landets första europeiska bosättning — vid en hamn uppkallad efter drottning Victoria."
+   },
+   {
+    "p": 2,
+    "t": "Nu är vi framme i Sydafrikas lagstiftande huvudstad, \"moderstaden\" nära Godahoppsudden."
+   }
+  ],
+  "why": "10 p — Bartolomeu Dias rundade udden 1488 och kallade den Cabo das Tormentas (Stormarnas udde); kung Johan II döpte om den till Godahoppsudden. Staden kallades \"havens värdshus\" (Tavern of the Seas).\n\n8 p — Nelson Mandela höll sitt första tal efter frigivningen 1990 från rådhusets (City Halls) balkong; han hade suttit 18 år på Robben Island.\n\n6 p — Taffelberget (Table Mountain) är ett av naturens sju nya underverk; middagskanonen avfyras dagligen på Signalkullen.\n\n4 p — Jan van Riebeeck anlade proviantstationen 1652 (landets första europeiska bosättning); V&A Waterfront är uppkallad efter drottning Victoria och prins Alfred.\n\n2 p — Kapstaden är Sydafrikas lagstiftande huvudstad, \"moderstaden\".",
+  "foljd": [
+   {
+    "intro": "Stadens siluett domineras av ett platt berg — och strax utanför ligger en ö vars namn blev en symbol för hela kampen mot apartheid.",
+    "q": "Vilket platt berg, ett av naturens sju nya underverk, reser sig över Kapstaden?",
+    "a": "Taffelberget (Table Mountain)"
+   },
+   {
+    "intro": "",
+    "q": "På vilken ö utanför staden satt Nelson Mandela fängslad?",
+    "a": "Robben Island"
+   },
+   {
+    "intro": "Sydafrika är unikt med sina tre huvudstäder — och Kapstaden fyller en av rollerna, ända sedan holländarna först klev iland.",
+    "q": "Sydafrika har tre huvudstäder — vilken funktion har Kapstaden?",
+    "a": "Lagstiftande (parlamentet)"
+   },
+   {
+    "intro": "",
+    "q": "Vem grundade staden 1652 åt Ostindiska kompaniet?",
+    "a": "Jan van Riebeeck"
+   },
+   {
+    "intro": "Godahoppsudden får ofta äran som Afrikas sydspets — men det är faktiskt en förväxling. Och vid matbordet regerar en kryddig gratäng.",
+    "q": "Vilken udde är egentligen Afrikas sydligaste punkt (inte Godahoppsudden)?",
+    "a": "Kap Agulhas"
+   },
+   {
+    "intro": "",
+    "q": "Vilken kryddig köttgratäng med äggstanning räknas som Sydafrikas nationalrätt?",
+    "a": "Bobotie"
+   }
+  ],
+  "musik": {
+   "intro": "Kapstadens mest ökända musikexport blandar rap, rave och afrikaans till något helt eget.",
+   "q": "Vilken sydafrikansk \"rap-rave\"-grupp bildades i Kapstaden 2008 — och vad heter dess två frontfigurer?",
+   "a": "Die Antwoord · Ninja & Yolandi Visser"
+  }
+ },
  "kiruna": {
   "namn": "Kiruna",
   "land": "Sverige",
@@ -199,6 +266,140 @@ window.RESOR_DATA = {
    "intro": "Popmusiken letade sig tidigt ner i gruvsamhällena: på 1960-talet repade ett gäng Kirunagrabbar i Folkets hus — och nådde nästan hela vägen till svenska listans topp.",
    "q": "Ett 60-talspopband bildat i gruvsamhället Tuolluvaara utanför Kiruna, som nådde andraplatsen på svenska listan 1967 med \"Chris-Craft No. 9\" — samt ett countryband från Kiruna som hörts flitigt i P4.",
    "a": "The Shanes · Willy Clay Band"
+  }
+ },
+ "kyoto": {
+  "namn": "Kyoto",
+  "land": "Japan",
+  "flagga": "🚩",
+  "svarighet": "svår",
+  "avsnitt": "Genererad (ej från sändning)",
+  "clues": [
+   {
+    "p": 10,
+    "t": "Kasta om bokstäverna i landets nuvarande huvudstad, så får du vår — och båda betyder ungefär \"huvudstad\". Här hovförfattade en dam för tusen år sedan det som brukar kallas världens första roman."
+   },
+   {
+    "p": 8,
+    "t": "1889 grundades här en tillverkare av spelkort som idag gör tv-spel, och 1997 skrevs ett klimatavtal under som bär stadens namn."
+   },
+   {
+    "p": 6,
+    "t": "Staden skonades medvetet från atombomben för sina tempels skull — Nagasaki drabbades i stället — och i stadsdelen Gion lever geishatraditionen kvar."
+   },
+   {
+    "p": 4,
+    "t": "Ett gyllene paviljongtempel speglar sig i sin damm, och tusentals röda torii-portar slingrar sig upp för Inariberget."
+   },
+   {
+    "p": 2,
+    "t": "I över tusen år var vi Japans kejserliga huvudstad, innan hovet flyttade till Tokyo 1868. Var är vi?"
+   }
+  ],
+  "why": "10 p — Tokyo och Kyoto är anagram (samma bokstäver K-O-O-T-Y) och båda namnen betyder ungefär \"huvudstad\". Murasaki Shikibu skrev Berättelsen om Genji (~1010) vid hovet — ofta kallad världens första roman.\n\n8 p — Nintendo grundades i Kyoto 1889 som tillverkare av hanafuda-spelkort. Kyotoprotokollet antogs i staden 1997.\n\n6 p — Kyoto ströks medvetet från atombombens mållista (Henry Stimson övertygade Truman); Nagasaki bombades i stället. Gion är stadens berömda geishakvarter.\n\n4 p — Kinkaku-ji (Gyllene paviljongen) och Fushimi Inari med sina tusentals röda torii-portar.\n\n2 p — Kyoto var Japans kejserliga huvudstad i över tusen år (fram till 1868).",
+  "foljd": [
+   {
+    "intro": "Staden har gett sitt namn till både ett världsberömt fördrag och ett av världens största spelföretag — som en gång i tiden bara gjorde kort.",
+    "q": "Vilket klimatavtal från 1997 bär stadens namn?",
+    "a": "Kyotoprotokollet"
+   },
+   {
+    "intro": "",
+    "q": "Vilken spelkorts- och tv-spelstillverkare grundades i Kyoto 1889?",
+    "a": "Nintendo"
+   },
+   {
+    "intro": "Kyoto betyder just \"huvudstad\" — men titeln lämnades vidare i samband med kejsarmaktens återkomst på 1800-talet.",
+    "q": "Till vilken stad flyttades Japans huvudstad 1868?",
+    "a": "Tokyo"
+   },
+   {
+    "intro": "",
+    "q": "Vad betyder namnet Kyoto ungefär?",
+    "a": "Huvudstad(en)"
+   },
+   {
+    "intro": "Från hovdamer med bläckpensel till lysande röda portar — Kyoto är japansk kultur i koncentrat.",
+    "q": "Vilket Kyototempel är känt för sina tusentals röda torii-portar?",
+    "a": "Fushimi Inari (taisha)"
+   },
+   {
+    "intro": "",
+    "q": "Vem skrev Berättelsen om Genji, ofta kallad världens första roman?",
+    "a": "Murasaki Shikibu"
+   }
+  ],
+  "musik": {
+   "intro": "Kyoto saknar ett världskänt husband — men två av dess barn har nått långt, var för sig.",
+   "q": "En J-popsångerska född i Kyoto 1982, samt en Kyotofödd trummis som spelat i brittiska Simply Red.",
+   "a": "Kumi Koda (Koda Kumi) · Gota Yashiki"
+  }
+ },
+ "lissabon": {
+  "namn": "Lissabon",
+  "land": "Portugal",
+  "flagga": "🚩",
+  "svarighet": "medel",
+  "avsnitt": "Genererad (ej från sändning)",
+  "clues": [
+   {
+    "p": 10,
+    "t": "Enligt sägnen ska en listig grekisk irrfärdare ha lagt grunden till vår stad och gett den ett namn som ekar av hans eget. Här föddes en vemodig sångkonst byggd på saknad — och en allhelgonadag rasade allt samman i skalv, brand och flodvåg."
+   },
+   {
+    "p": 8,
+    "t": "I ett kloster vid floden vilar mannen som seglade sjövägen till Indien, och i stadens gränder diktade en poet under ett dussin olika namn."
+   },
+   {
+    "p": 6,
+    "t": "En röd hängbro, tvillinglik San Franciscos, spänner över floden, vakad av en Kristusstaty med öppna armar — medan gula spårvagnar kämpar sig upp för de sju kullarna."
+   },
+   {
+    "p": 4,
+    "t": "Från ett torn i stadsdelen Belém, vid Tejos mynning, kastade upptäcktsresorna loss — och i samma kvarter bakas ännu den ursprungliga vaniljpajen."
+   },
+   {
+    "p": 2,
+    "t": "Nu är vi framme i Portugals huvudstad — kontinentala Europas västligaste."
+   }
+  ],
+  "why": "10 p — Antikens författare knöt stadens gamla namn Olisipo/Ulyssipo till Ulixes (Odysseus), som i sägnen grundat orten — namnet \"ekar av hans eget\". Fadon, präglad av saudade (saknad), föddes i stadens arbetarkvarter. Den 1 november (allhelgonadagen) 1755 ödelades staden av jordbävning, brand och tsunami.\n\n8 p — Vasco da Gama (sjövägen till Indien 1498) vilar i Jerónimosklostret vid floden. Poeten Fernando Pessoa, född i staden, skrev under en mängd heteronymer (\"ett dussin olika namn\").\n\n6 p — 25 de Abril-bron liknar Golden Gate; Cristo Rei-statyn står på södra stranden; spårvagn 28 klättrar för \"de sju kullarna\".\n\n4 p — Belémtornet vid Tejos (Tagus) mynning; upptäcktsfärderna avseglade härifrån. Pastéis de Belém har bakats i kvarteret sedan 1837.\n\n2 p — Lissabon är Portugals huvudstad och kontinentala Europas västligaste huvudstad.",
+  "foljd": [
+   {
+    "intro": "Lissabon breder ut sig längs en väldig flodmynning, och på det gamla varvsområdet i öster hölls en världsutställning som gav staden ett av Europas största akvarier.",
+    "q": "Vilken flod mynnar vid Lissabon?",
+    "a": "Tejo (Tagus)"
+   },
+   {
+    "intro": "",
+    "q": "Vilken världsutställning hölls i Lissabon 1998, med Oceanário kvar som minne?",
+    "a": "Expo 98"
+   },
+   {
+    "intro": "Våren 1974 tog en grupp officerare makten nästan utan blodspillan — och folket stack röda blommor i gevärspiporna.",
+    "q": "Vad kallas den nästan oblodiga revolutionen den 25 april 1974?",
+    "a": "Nejlikerevolutionen"
+   },
+   {
+    "intro": "",
+    "q": "Vilken diktatur (grundad av Salazar) störtades då?",
+    "a": "Estado Novo"
+   },
+   {
+    "intro": "Två av stadens mest älskade skänker till världen är en sångstil och en liten paj — båda med rötter i klostren och krogarna.",
+    "q": "Vilken portugisisk sångstil, präglad av saudade, togs upp på Unescos lista över immateriellt kulturarv 2011?",
+    "a": "Fado"
+   },
+   {
+    "intro": "",
+    "q": "Vad heter den lilla vaniljpajen (custardpaj) som förknippas med Lissabon och Belém?",
+    "a": "Pastel de nata (Pastéis de Belém)"
+   }
+  ],
+  "musik": {
+   "intro": "Från fadons vemod till hård rock — staden har gett röst åt bådadera.",
+   "q": "Ett rockband bildat i Lissabon 1978, samt fadons drottning som föddes i staden 1920.",
+   "a": "Xutos & Pontapés · Amália Rodrigues"
   }
  },
  "marseille": {
@@ -268,6 +469,73 @@ window.RESOR_DATA = {
    "a": "IAM · Akhenaton"
   }
  },
+ "new-york": {
+  "namn": "New York",
+  "land": "USA",
+  "flagga": "🚩",
+  "svarighet": "lätt",
+  "avsnitt": "Genererad (ej från sändning)",
+  "clues": [
+   {
+    "p": 10,
+    "t": "Författaren Washington Irving döpte oss efter en engelsk by full av kloka dårar; holländarna kallade platsen \"Nytt Amsterdam\"; och en sportskribent gav oss ett smeknamn hämtat från en frukt."
+   },
+   {
+    "p": 8,
+    "t": "Här låg landets första huvudstad — vid Federal Hall svor den förste presidenten sin ämbetsed 1789 — och på en ö i hamnen togs miljoner invandrare emot."
+   },
+   {
+    "p": 6,
+    "t": "I en av våra fem stadsdelar föddes hiphopen en augustikväll 1973, och en Sinatralåt lovar att den som klarar sig här klarar sig var som helst."
+   },
+   {
+    "p": 4,
+    "t": "En fransk gåva håller upp sin fackla i hamnen, och en jättegorilla klättrade en gång upp för stadens berömda skyskrapa."
+   },
+   {
+    "p": 2,
+    "t": "Nu är vi framme i USA:s folkrikaste stad, byggd kring ön Manhattan."
+   }
+  ],
+  "why": "10 p — Washington Irving myntade \"Gotham\" (efter den engelska byn Gotham, \"de kloka dårarnas by\"). Holländarna grundade Nya Amsterdam 1625. Sportskribenten John J. Fitz Gerald populariserade \"The Big Apple\" på 1920-talet.\n\n8 p — New York var USA:s första huvudstad; George Washington installerades vid Federal Hall 1789. Ellis Island var invandrarnas mottagningsstation.\n\n6 p — Hiphopen föddes i Bronx den 11 augusti 1973 (DJ Kool Herc). Sinatras \"Theme from New York, New York\": \"If I can make it there, I'll make it anywhere.\"\n\n4 p — Frihetsgudinnan var en gåva från Frankrike (1886). King Kong klättrade upp för Empire State Building (film 1933).\n\n2 p — New York är USA:s folkrikaste stad, byggd kring Manhattan.",
+  "foljd": [
+   {
+    "intro": "Staden är indelad i självstyrande stadsdelar, och en av dem har fått en alldeles egen plats i musikhistorien.",
+    "q": "Hur många stadsdelar (boroughs) har New York?",
+    "a": "Fem"
+   },
+   {
+    "intro": "",
+    "q": "Vilken av dem räknas som hiphopens födelseplats?",
+    "a": "Bronx"
+   },
+   {
+    "intro": "Vid inloppet till hamnen står en av världens mest kända statyer — en present med ett högtidligt riktigt namn.",
+    "q": "Vad är Frihetsgudinnans officiella namn?",
+    "a": "Liberty Enlightening the World (Friheten upplyser världen)"
+   },
+   {
+    "intro": "",
+    "q": "Vilket land gav statyn i gåva?",
+    "a": "Frankrike"
+   },
+   {
+    "intro": "Innan skyskraporna reste sig var staden nybyggarnas första anhalt i det nya landet — och en tid till och med huvudstad.",
+    "q": "Vilken ö i New Yorks hamn var invandrarnas mottagningsstation 1892–1954?",
+    "a": "Ellis Island"
+   },
+   {
+    "intro": "",
+    "q": "Vem svor presidenteden i New York 1789 som landets förste president?",
+    "a": "George Washington"
+   }
+  ],
+  "musik": {
+   "intro": "Från rå punk i Queens till dagens största popstjärnor — staden odlar båda.",
+   "q": "Ett punkband bildat i Queens 1974, samt en popartist född på Manhattan 1986.",
+   "a": "The Ramones · Lady Gaga"
+  }
+ },
  "rom": {
   "namn": "Rom",
   "land": "Italien",
@@ -334,9 +602,282 @@ window.RESOR_DATA = {
    "q": "En legendarisk filmmusikkompositör född i staden 1928, samt spaghettivästern från 1966 vars visslande huvudtema han skrev.",
    "a": "Ennio Morricone · Den gode, den onde, den fule (The Good, the Bad and the Ugly)"
   }
+ },
+ "visby": {
+  "namn": "Visby",
+  "land": "Sverige",
+  "flagga": "🇸🇪",
+  "svarighet": "svår",
+  "avsnitt": "Genererad (ej från sändning)",
+  "clues": [
+   {
+    "p": 10,
+    "t": "Vårt ortnamn börjar i en hednisk offerplats och slutar i en by. 1361 lät en dansk kung enligt sägnen brandskatta staden — en scen förevigad på en berömd målning i Nationalmuseum."
+   },
+   {
+    "p": 8,
+    "t": "En medeltida ringmur på drygt tre kilometer omsluter oss — en av Nordeuropas bäst bevarade — från tiden då vi var Hansans nav i Östersjön."
+   },
+   {
+    "p": 6,
+    "t": "1968 byggdes Villa Villekulla här för en rödhårig flickas tv-serie, och varje sommar samlas rikets politiker till en vecka i en park nere vid hamnen."
+   },
+   {
+    "p": 4,
+    "t": "Vi är på Sveriges största ö, där domkyrkan Sankta Maria är stadens enda medeltidskyrka som ännu används — och där en medeltidsvecka firas varje augusti."
+   },
+   {
+    "p": 2,
+    "t": "Rosornas och ruinernas stad, Gotlands huvudort och Unescovärldsarv sedan 1995. Var är vi?"
+   }
+  ],
+  "why": "10 p — Namnet = Vi (hednisk kult-/offerplats) + by. Valdemar Atterdag erövrade Gotland 1361; sägnen om brandskattningen förevigades av Carl Gustaf Hellqvist (1882, Nationalmuseum).\n\n8 p — Ringmuren (~3,4 km) är en av Nordeuropas bäst bevarade stadsmurar, från Visbys tid som Hansans centrum i Östersjön.\n\n6 p — Villa Villekulla byggdes 1968 vid Visby för Pippi Långstrump-serien (flyttades senare till Kneippbyn). Almedalsveckan hålls i parken Almedalen vid hamnen.\n\n4 p — Gotland (Sveriges största ö); Visby domkyrka (Sankta Maria) är stadens enda medeltidskyrka som ännu används; Medeltidsveckan firas i augusti.\n\n2 p — Visby — \"rosornas och ruinernas stad\", Gotlands huvudort, Unescovärldsarv sedan 1995.",
+  "foljd": [
+   {
+    "intro": "En sommarvecka varje år förvandlas den lilla staden till Sveriges politiska centrum, dit alla partiledare vallfärdar.",
+    "q": "På vilken ö ligger Visby?",
+    "a": "Gotland"
+   },
+   {
+    "intro": "",
+    "q": "Vad kallas den politikervecka som hålls i Visby varje sommar?",
+    "a": "Almedalsveckan"
+   },
+   {
+    "intro": "Medeltiden är aldrig långt borta i Visby — den syns i murarna och firas med riddarspel varje augusti.",
+    "q": "Vad heter den medeltida stadsmur som omger gamla Visby?",
+    "a": "Ringmuren (Visby ringmur)"
+   },
+   {
+    "intro": "",
+    "q": "Vilket historiskt festfirande drar tusentals besökare till Visby i augusti?",
+    "a": "Medeltidsveckan"
+   },
+   {
+    "intro": "Gotlands historia rymmer både danska erövrare och en säregen natur längs kusten.",
+    "q": "Vilken dansk kung erövrade Gotland 1361?",
+    "a": "Valdemar Atterdag"
+   },
+   {
+    "intro": "",
+    "q": "Vad kallas de kalkstenspelare (klippformationer) som är typiska för Gotlands kust?",
+    "a": "Raukar"
+   }
+  ],
+  "musik": {
+   "intro": "",
+   "q": "Musikfråga — se resans wikisida.",
+   "a": "(se resans wikisida)"
+  }
  }
 };
 window.MOMENT_DATA = {
+ "listan-new-york-byggnader": {
+  "typ": "listan",
+  "titel": "Listan — New York-byggnader",
+  "kort": "Listan",
+  "facit": "De fyra i New York: Empire State Building och Chrysler Building (Manhattans art déco-skyskrapor), Flatiron Building (den strykjärnsformade tegelbyggnaden) och Frihetsgudinnan (på Liberty Island i hamnen). De övriga: Willis Tower (Chicago), Space Needle (Seattle), Gateway Arch (St. Louis) och Hollywood-skylten (Los Angeles).",
+  "bridge": "🌉 Bryggan: Listan knyter tillbaka till New York-resans skyskrapeledtråd — samma stad där King Kong klättrade upp för Empire State Building.",
+  "amne": "Vilka fyra av dessa åtta berömda byggnadsverk står i New York?",
+  "intro": "New Yorks siluett är en av världens mest fotograferade — men flera av USA:s mest kända landmärken ligger i helt andra städer. Fyra av åtta här står i New York. Vilka?",
+  "alternativ": [
+   {
+    "t": "Empire State Building",
+    "ok": true,
+    "wiki": [
+     [
+      "en",
+      "Empire State Building"
+     ],
+     [
+      "sv",
+      "Empire State Building"
+     ]
+    ]
+   },
+   {
+    "t": "Willis Tower",
+    "ok": false,
+    "vem": "Chicago",
+    "wiki": [
+     [
+      "en",
+      "Willis Tower"
+     ]
+    ]
+   },
+   {
+    "t": "Chrysler Building",
+    "ok": true,
+    "wiki": [
+     [
+      "en",
+      "Chrysler Building"
+     ]
+    ]
+   },
+   {
+    "t": "Space Needle",
+    "ok": false,
+    "vem": "Seattle",
+    "wiki": [
+     [
+      "en",
+      "Space Needle"
+     ]
+    ]
+   },
+   {
+    "t": "Flatiron Building",
+    "ok": true,
+    "wiki": [
+     [
+      "en",
+      "Flatiron Building"
+     ]
+    ]
+   },
+   {
+    "t": "Gateway Arch",
+    "ok": false,
+    "vem": "St. Louis",
+    "wiki": [
+     [
+      "en",
+      "Gateway Arch"
+     ]
+    ]
+   },
+   {
+    "t": "Frihetsgudinnan",
+    "ok": true,
+    "wiki": [
+     [
+      "en",
+      "Statue of Liberty"
+     ],
+     [
+      "sv",
+      "Frihetsgudinnan"
+     ]
+    ]
+   },
+   {
+    "t": "Hollywood-skylten",
+    "ok": false,
+    "vem": "Los Angeles",
+    "wiki": [
+     [
+      "en",
+      "Hollywood Sign"
+     ]
+    ]
+   }
+  ]
+ },
+ "listan-portugisiska-upptacktsresande": {
+  "typ": "listan",
+  "titel": "Listan — Portugisiska upptäcktsresande",
+  "kort": "Listan",
+  "facit": "De fyra portugiserna: Vasco da Gama (sjövägen till Indien 1498), Bartolomeu Dias (rundade Afrikas sydspets 1488), Pedro Álvares Cabral (nådde Brasilien 1500) och Fernão de Magalhães / Magellan — född i Portugal, men ledde den första jordenruntseglingen 1519–22 i spansk tjänst. De övriga: Columbus (Genua), Vespucci (Florens), Cook (Storbritannien) och Amundsen (Norge).",
+  "bridge": "🌉 Bryggan: Listan knyter tillbaka till Lissabonresans tiopoängare — Vasco da Gama, som vilar i Jerónimosklostret, var en av dessa portugisiska sjöfarare.",
+  "amne": "Vilka fyra av dessa åtta upptäcktsresande föddes i Portugal?",
+  "intro": "Från Lissabon och Belém kastade upptäcktsfärderna loss under 1400- och 1500-talen. Men alla store sjöfarare var inte portugiser — flera seglade för andra kronor. Fyra av åtta här föddes i Portugal. Vilka? (Obs: en av dem föddes i Portugal men seglade sedan för Spanien — han räknas ändå som portugis till börden.)",
+  "alternativ": [
+   {
+    "t": "Vasco da Gama",
+    "ok": true,
+    "wiki": [
+     [
+      "en",
+      "Vasco da Gama"
+     ],
+     [
+      "sv",
+      "Vasco da Gama"
+     ]
+    ]
+   },
+   {
+    "t": "Christofer Columbus",
+    "ok": false,
+    "vem": "Genua/Italien (seglade för Spanien)",
+    "wiki": [
+     [
+      "en",
+      "Christopher Columbus"
+     ]
+    ]
+   },
+   {
+    "t": "Bartolomeu Dias",
+    "ok": true,
+    "wiki": [
+     [
+      "en",
+      "Bartolomeu Dias"
+     ]
+    ]
+   },
+   {
+    "t": "Amerigo Vespucci",
+    "ok": false,
+    "vem": "Florens/Italien",
+    "wiki": [
+     [
+      "en",
+      "Amerigo Vespucci"
+     ]
+    ]
+   },
+   {
+    "t": "Pedro Álvares Cabral",
+    "ok": true,
+    "wiki": [
+     [
+      "en",
+      "Pedro Álvares Cabral"
+     ]
+    ]
+   },
+   {
+    "t": "James Cook",
+    "ok": false,
+    "vem": "Storbritannien",
+    "wiki": [
+     [
+      "en",
+      "James Cook"
+     ]
+    ]
+   },
+   {
+    "t": "Fernão de Magalhães (Magellan)",
+    "ok": true,
+    "wiki": [
+     [
+      "en",
+      "Ferdinand Magellan"
+     ],
+     [
+      "sv",
+      "Ferdinand Magellan"
+     ]
+    ]
+   },
+   {
+    "t": "Roald Amundsen",
+    "ok": false,
+    "vem": "Norge",
+    "wiki": [
+     [
+      "en",
+      "Roald Amundsen"
+     ]
+    ]
+   }
+  ]
+ },
  "listan-stolklassiker": {
   "typ": "listan",
   "titel": "Listan — Stolklassikerna",
@@ -456,6 +997,19 @@ window.MOMENT_DATA = {
    }
   ]
  },
+ "narmast-cape-agulhas": {
+  "typ": "narmast",
+  "titel": "Närmast vinner — Kap Agulhas",
+  "kort": "Närmast vinner",
+  "facit": "Kap Agulhas (Cape Agulhas), ~150 km öst-sydöst om Godahoppsudden, är Afrikas sydligaste punkt (34°49′58″S). Här går även den officiella gränsen mellan Atlanten och Indiska oceanen (20:e östliga meridianen, enligt International Hydrographic Organization). Godahoppsudden är bara kontinentens sydvästligaste hörn — en klassisk missuppfattning.",
+  "bridge": "🌉 Bryggan: Kapstadenresans följdfråga gömde just denna fälla — det är Kap Agulhas, inte Godahoppsudden, som är Afrikas sydspets.",
+  "fraga": "Afrikas sydligaste punkt är inte den berömda Godahoppsudden, som många tror — placera den udde som faktiskt är kontinentens sydspets, och som skiljer Atlanten från Indiska oceanen: Kap Agulhas.",
+  "target": {
+   "namn": "Kap Agulhas",
+   "lat": -34.833,
+   "lon": 20.003
+  }
+ },
  "narmast-strasbourg": {
   "typ": "narmast",
   "titel": "Närmast vinner — Strasbourg",
@@ -468,6 +1022,32 @@ window.MOMENT_DATA = {
    "lat": 48.5734,
    "lon": 7.7521
   }
+ },
+ "vemdar-bergman": {
+  "typ": "vemdar",
+  "titel": "Vem där? — Ingmar Bergman",
+  "kort": "Vem där?",
+  "facit": "Ingmar Bergman (1918–2007), svensk regissör född i Uppsala, känd för \"Det sjunde inseglet\" (1957, riddaren som spelar schack med Döden), \"Smultronstället\" och \"Persona\". Han bosatte sig på Fårö norr om Gotland, spelade in flera filmer där och ligger begravd på Fårö kyrkogård. Föddes fyra dagar före Nelson Mandela, samma år 1918.",
+  "bridge": "🌉 Bryggan: Bergman gjorde FÅRÖ, strax norr om Gotland, till sitt hem — samma ö-rike som Visbyresans facit. (Och riddaren som spelar schack med Döden filmades vid Hovs hallar nära Torekov — ännu en tråd i frågebatteriet.)",
+  "clues": [
+   "Han föddes 14 juli 1918 i Uppsala — bara fyra dagar före en viss sydafrikansk frihetskämpe — och blev en av filmhistoriens mest hyllade regissörer.",
+   "I en av hans mest kända filmer spelar en hemvändande riddare schack med Döden på en strand; andra klassiker är \"Smultronstället\" och \"Persona\".",
+   "Han drog sig undan till en karg ö norr om Gotland, gjorde flera filmer där, dog där 2007 och ligger begravd på öns kyrkogård."
+  ],
+  "answer": "Ingmar Bergman"
+ },
+ "vemdar-mandela": {
+  "typ": "vemdar",
+  "titel": "Vem där? — Nelson Mandela",
+  "kort": "Vem där?",
+  "facit": "Nelson Mandela (1918–2013), född i Mvezo i Transkei, klannamn Madiba, dopnamn Rolihlahla (\"orosstiftare\"). Satt fängslad i 27 år, varav 18 på Robben Island utanför Kapstaden, med fångnummer 46664. Frigavs 11 februari 1990, delade Nobels fredspris 1993 med F.W. de Klerk och valdes 1994 till Sydafrikas förste svarte president.",
+  "bridge": "🌉 Bryggan: Mandela satt fängslad på ROBBEN ISLAND utanför KAPSTADEN och höll sitt första tal som fri man från stadens rådhusbalkong — samma ö som skymtade redan i Kapstadenresans åttapoängare.",
+  "clues": [
+   "Han föddes 1918 i en liten by i Transkei och fick av sin far namnet Rolihlahla — som brukar tolkas som \"orosstiftare\". Hans klannamn, Madiba, blev senare hela nationens smeknamn på honom.",
+   "I 27 år satt han fängslad, 18 av dem på en ö utanför en storstad; hans fångnummer 46664 blev världsberömt.",
+   "Den 11 februari 1990 gick han fri, delade 1993 års Nobels fredspris med F.W. de Klerk och blev 1994 sitt lands förste demokratiskt valde president."
+  ],
+  "answer": "Nelson Mandela"
  },
  "vemdar-utzon": {
   "typ": "vemdar",

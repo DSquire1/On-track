@@ -109,6 +109,9 @@
   .opt.missed{border-color:var(--green);border-style:dashed;opacity:.75}
   .opt .mark{float:right;font-size:14px}
   /* Närmast vinner */
+  .svarrow{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .svarrow input{flex:1;min-width:150px;background:var(--bg2);border:1px solid var(--line);color:var(--ink);
+    padding:11px 13px;border-radius:10px;font-size:15px}
   .mapbox{position:relative;margin:14px 0;border:1px solid var(--line);border-radius:14px;overflow:hidden;
     background:linear-gradient(180deg,#132443,#0e1b33);height:380px;cursor:crosshair}
   .mapbox.locked{cursor:default}
@@ -138,6 +141,57 @@
   .leaflet-container{background:#0e1b33;font-family:inherit}
   .leaflet-tooltip{background:var(--panel);color:var(--ink);border:1px solid var(--gold);border-radius:8px;font-weight:700}
   .leaflet-tooltip-top:before{border-top-color:var(--gold)}
+  img{max-width:100%}
+  /* ---------- Surfplatta ---------- */
+  @media (max-width:820px){
+    .wrap{padding:16px 14px 52px}
+    .stage{padding:18px}
+    .optgrid{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+  }
+  /* ---------- Mobil ---------- */
+  @media (max-width:560px){
+    .wrap{padding:12px 11px 46px}
+    header{gap:8px;margin-bottom:10px}
+    .logo{font-size:18px}
+    .tag{font-size:11px;padding:2px 7px}
+    .btn,.btn-ghost,.btn-gold,.btn-red,.btn-green{padding:9px 11px;font-size:13px}
+    header .btn,header .btn-ghost{padding:8px 10px;font-size:12px}
+    .score{gap:8px;margin-bottom:12px}
+    .team{padding:10px 11px}
+    .team h3{font-size:13px}
+    .team .pts{font-size:26px}
+    .team .adj{gap:5px}
+    .team .adj button{width:30px;height:30px;font-size:14px}
+    .vs{font-size:11px}
+    .vs .max{font-size:12px}
+    .progress{gap:5px;margin-bottom:12px}
+    .seg-dot{font-size:10.5px;padding:3px 8px}
+    .stage{padding:15px;border-radius:14px;min-height:0}
+    .kicker{font-size:12px}
+    .stage h2{font-size:20px}
+    .center{padding:14px 4px}
+    .center h2{font-size:23px}
+    .winner{font-size:32px}
+    .sub{font-size:13.5px}
+    .rung{padding:11px 12px}
+    .rung .row{grid-template-columns:42px 1fr;gap:9px}
+    .rung .chip{font-size:17px;padding:6px 0}
+    .rung p{font-size:14.5px;line-height:1.4}
+    .badges{margin-left:0;margin-top:8px}
+    .optgrid{grid-template-columns:1fr;gap:8px}
+    .opt{padding:12px}
+    .opt img{height:150px}
+    .opt .mark{float:none;display:block;margin-top:6px}
+    .pickgrid{grid-template-columns:1fr;max-width:none}
+    .mapbox{height:290px}
+    #lmap{height:300px}
+    .controls{gap:8px}
+    .controls button{flex:1 1 auto}
+    .buzzbtn{flex:1 1 auto;text-align:center}
+    .center input{width:100%;max-width:none;margin:6px 0}
+    .svarrow input{min-width:0}
+    .judge-row .who{min-width:0;flex:1 1 100%}
+  }
 </style>
 </head>
 <body>
@@ -159,32 +213,85 @@
 <script src="resor-data.js"></script>
 <script>
 /* ================= VY ================= */
-const IS_VIEWER = location.hash.indexOf('tittare')>=0;
+const QP = new URLSearchParams(location.search);
+const TEAM = QP.get('lag')==='1' ? 0 : QP.get('lag')==='2' ? 1 : null;  // 📱 lagvy
+const IS_VIEWER = location.hash.indexOf('tittare')>=0 || TEAM!==null;
 let viewerWin = null;
+let INPUTBUF={}, SENTF={};  // lagvyns skrivbuffert + skickat-flaggor (överlever omritningar)
 
 /* ===== FJÄRRSYNK (Firebase Realtime Database — aktiveras av firebase-config.js) =====
    Spelledaren skriver hela spelläget till rum/<KOD>/state; tittare (t.ex. mobiler som öppnat
    dellänken) prenumererar och renderar. Utan config fungerar allt som förut, lokalt. */
-let FDB=null, RUM=null;
+let FDB=null, FROOT=null, RUM=null, SVAR={};
 (function initFirebase(){
   if(typeof firebase==='undefined' || !window.FIREBASE_CONFIG) return;
   try{
     firebase.initializeApp(window.FIREBASE_CONFIG);
-    const p=new URLSearchParams(location.search);
-    RUM=(p.get('rum')||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);
+    RUM=(QP.get('rum')||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);
     if(!RUM && !IS_VIEWER){
       RUM=Array.from({length:4},()=>String.fromCharCode(65+Math.floor(Math.random()*26))).join('');
     }
     if(!RUM) return;
-    FDB=firebase.database().ref('rum/'+RUM+'/state');
+    FROOT=firebase.database().ref('rum/'+RUM);
+    FDB=FROOT.child('state');
     if(IS_VIEWER){
       FDB.on('value',snap=>{ const v=snap.val();
         if(v){ try{ S=JSON.parse(v); render(); }catch(e){} } });
+    } else {
+      // Värden lyssnar på lagens inskickade svar (nödbroms, följdfrågor, Vem där?)
+      FROOT.child('svar').on('value',snap=>{ SVAR=snap.val()||{}; if(S.started) render(); });
     }
-  }catch(e){ FDB=null; }
+  }catch(e){ FDB=null; FROOT=null; }
 })();
-function viewerLink(){
-  return RUM ? location.origin+location.pathname+'?rum='+RUM+'#tittare' : null;
+function shareUrl(kind){
+  if(!RUM) return null;
+  const base=location.origin+location.pathname+'?rum='+RUM;
+  return kind==='tittare' ? base+'#tittare' : base+'&lag='+(kind==='lag1'?1:2)+'#lag';
+}
+function viewerLink(){ return shareUrl('tittare'); }
+function copyShare(kind){
+  const u=shareUrl(kind); if(!u) return;
+  if(navigator.clipboard) navigator.clipboard.writeText(u); else prompt('Kopiera länken:',u);
+  const n=document.getElementById('copyNote');
+  if(n){ n.textContent='✔ '+(kind==='tittare'?'tittarlänk':kind==='lag1'?'Lag 1-länk':'Lag 2-länk')+' kopierad';
+    setTimeout(()=>{ if(n) n.textContent=''; },2500); }
+}
+
+/* ---- Lagvyns sändfunktioner (skriver till rum/<KOD>/svar/<lag>) ---- */
+function sendBrake(){
+  if(TEAM===null||!FROOT||!S.started)return;
+  const d=RESOR[S.segs[S.seg].key];
+  FROOT.child('svar/'+TEAM+'/brake').set({seg:S.seg, level:d.clues[S.run.idx].p, svar:(INPUTBUF['brake'+S.seg]||'').trim()});
+  SENTF['brake'+S.seg]=true; render();
+}
+function sendFu(key){
+  if(TEAM===null||!FROOT)return;
+  const svar=(INPUTBUF['fu'+S.seg+'_'+key]||'').trim(); if(!svar)return;
+  FROOT.child('svar/'+TEAM+'/fu/'+S.seg+'_'+key).set(svar);
+  SENTF['fu'+S.seg+'_'+key]=true; render();
+}
+function sendVem(){
+  if(TEAM===null||!FROOT)return;
+  FROOT.child('svar/'+TEAM+'/vem').set({seg:S.seg, svar:(INPUTBUF['vem'+S.seg]||'').trim()});
+  SENTF['vem'+S.seg]=true; render();
+}
+
+/* ---- Värden applicerar lagens inskickade händelser (anropas i början av render) ---- */
+function applyRemote(){
+  const seg=S.segs[S.seg], r=S.run;
+  if(!seg||!r) return;
+  [0,1].forEach(t=>{
+    const inp=SVAR[t]; if(!inp) return;
+    if(seg.type==='resa' && r.phase==='travel' && inp.brake && inp.brake.seg===S.seg && !r.guesses[t]){
+      const d=RESOR[seg.key];
+      r.guesses[t]={level:d.clues[r.idx].p, judged:null, svar:inp.brake.svar||''};
+      const other=1-t;
+      if(r.guesses[other]===null){ if(r.idx<d.clues.length-1) r.idx++; } else r.phase='judge';
+    }
+    if(seg.type==='vemdar' && inp.vem && inp.vem.seg===S.seg && !r.resolved && r.pending===null && !r.locked[t]){
+      r.pending=t; r.pendingSvar=inp.vem.svar||'';
+    }
+  });
 }
 
 /* ================= SPELDATA ================= */
@@ -301,10 +408,12 @@ function freshState(){
   return {started:false, ended:false, seg:0, segs:[],
     teams:[{namn:"Lag 1",p:0},{namn:"Lag 2",p:0}], run:null};
 }
+function shuffledIdx(n){ const a=[...Array(n).keys()];
+  for(let i=n-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 function initRun(){
   const seg=S.segs[S.seg];
   if(seg.type==="resa") S.run={idx:0, guesses:[null,null], phase:"travel", showFu:false, fu:{}, fuAward:{}};
-  else if(seg.type==="listan") S.run={team:null, picks:[], judged:false, bridge:false};
+  else if(seg.type==="listan") S.run={team:null, picks:[], judged:false, bridge:false, order:shuffledIdx(curMoment().alternativ.length)};
   else if(seg.type==="narmast") S.run={turn:0, temp:null, marks:[null,null], revealed:false, winners:null, bridge:false};
   else S.run={idx:0, pending:null, locked:[false,false], resolved:false, winner:null, bridge:false};
 }
@@ -315,13 +424,15 @@ const $stage=document.getElementById('stage'), $score=document.getElementById('s
       $prog=document.getElementById('progress');
 if(IS_VIEWER){
   document.body.classList.add('viewer');
-  document.getElementById('modeTag').textContent='📺 Tittarvy'; document.getElementById('modeTag').className='tag live';
+  document.getElementById('modeTag').textContent=TEAM!==null?('📱 Lagvy — Lag '+(TEAM+1)):'📺 Tittarvy';
+  document.getElementById('modeTag').className='tag live';
   document.getElementById('viewerBtn').style.display='none';
   document.getElementById('resetBtn').style.display='none';
 }
 
 /* ================= RENDER ================= */
 function render(){
+  if(!IS_VIEWER && FROOT && S.started && !S.ended) applyRemote();
   if(!S.started){ renderStart(); syncOut(); return; }
   if(S.ended){ renderEnd(); syncOut(); return; }
   renderScore(); renderProgress();
@@ -364,6 +475,12 @@ function renderStart(){
     <div class="note" id="pickNoteM">Välj specialmoment (0–3, spelas mellan/efter resorna). Allt hämtas från wikin (<code>resor-data.js</code>, byggd av <code>build-resor.py</code>).</div>
     <div style="margin-top:14px"><button class="btn-gold" style="padding:13px 26px;font-size:16px" onclick="startMatch()">▶ Starta matchen</button></div>
     <div class="pill">📺 Öppna „Tittarvy” i ett nytt fönster och lägg på en andra skärm/projektor för deltagarna.</div>
+    ${FDB?`<div class="note" style="margin-top:12px">📡 Rum <b style="color:var(--gold)">${RUM}</b> — kopiera och dela länkar:
+      <button class="btn" onclick="copyShare('tittare')">📺 Tittarvy</button>
+      <button class="btn" onclick="copyShare('lag1')">📱 Lag 1</button>
+      <button class="btn" onclick="copyShare('lag2')">📱 Lag 2</button>
+      <span id="copyNote" style="color:var(--green)"></span><br>
+      Lagen kan dra i nödbromsen och skicka svar direkt från mobilen.</div>`:''}
   </div>`;
 }
 function pickedResor(){
@@ -383,6 +500,7 @@ function startMatch(){
   S.teams[0].namn=(document.getElementById('t1').value.trim()||"Lag 1");
   S.teams[1].namn=(document.getElementById('t2').value.trim()||"Lag 2");
   S.segs=buildSegs(sel,mom);
+  if(FROOT){ try{ FROOT.child('svar').remove(); }catch(e){} SVAR={}; }
   S.started=true; S.seg=0; initRun(); render();
 }
 
@@ -418,7 +536,7 @@ function renderResa(seg){
   const ladder=d.clues.map((c,i)=>{
     const shown=i<=r.idx||judgeP, cur=(i===r.idx&&!judgeP);
     const badges=r.guesses.map((g,ti)=> g&&g.level===c.p
-      ? `<span class="badge ${g.judged===true?'ok':g.judged===false?'no':''}">🔒 ${escapeHtml(S.teams[ti].namn)}${g.judged===true?' ✔ +'+g.level+'p':g.judged===false?' ✗':''}</span>`
+      ? `<span class="badge ${g.judged===true?'ok':g.judged===false?'no':''}">🔒 ${escapeHtml(S.teams[ti].namn)}${g.judged!==null&&g.svar?' „'+escapeHtml(g.svar)+'”':''}${g.judged===true?' ✔ +'+g.level+'p':g.judged===false?' ✗':''}</span>`
       : '').join('');
     return `<div class="rung ${shown?'shown':''} ${cur?'current':''}">
       <div class="row"><div class="chip">${c.p}</div>
@@ -440,11 +558,20 @@ function renderResa(seg){
       <div class="note">Ett lag som drar låser sin gissning på den nivån — men rättas först på slutet. Motståndaren fortsätter på lägre nivå tills båda gissat.</div>`;
     } else {
       mid=`<div class="pill">Aktuell nivå: <b style="color:var(--gold)">${curP} p</b> — lagen reser vidare…</div>`;
+      if(TEAM!==null){
+        if(r.guesses[TEAM]) mid+=`<div class="panel"><h4>🔒 Ni har låst er gissning på ${r.guesses[TEAM].level} p</h4>
+          <div class="note">Rättningen sker när båda lagen gissat.</div></div>`;
+        else if(SENTF['brake'+S.seg]) mid+=`<div class="panel"><h4>⏳ Nödbroms skickad…</h4></div>`;
+        else mid+=`<div class="panel"><h4>🚨 Dra i nödbromsen · ${curP} p</h4>
+          <div class="svarrow"><input placeholder="Ert resmål…" value="${escapeHtml(INPUTBUF['brake'+S.seg]||'')}" oninput="INPUTBUF['brake${S.seg}']=this.value">
+          <button class="btn-red" onclick="sendBrake()">Lås gissning · ${curP} p</button></div>
+          <div class="note">Skriv resmålet och lås — ju tidigare, desto fler poäng.</div></div>`;
+      }
     }
   } else {
     // JUDGE
     const pend=r.guesses.map((g,i)=> (g&&g.judged===null)
-      ? `<div class="judge-row"><div class="who">${escapeHtml(S.teams[i].namn)} gissade på <b>${g.level} p</b></div>
+      ? `<div class="judge-row"><div class="who">${escapeHtml(S.teams[i].namn)} gissade på <b>${g.level} p</b>${(!IS_VIEWER&&g.svar)?' — 📱 „'+escapeHtml(g.svar)+'”':''}</div>
          ${IS_VIEWER?'<span class="pill">inväntar rättning…</span>':`<button class="btn-green" onclick="judge(${i},true)">✔ Rätt (+${g.level}p)</button>
          <button class="btn-red" onclick="judge(${i},false)">✗ Fel</button>`}</div>` : '').join('');
     const noGuess=r.guesses.map((g,i)=> g===null? `<div class="judge-row"><div class="who">${escapeHtml(S.teams[i].namn)} avstod — 0 p</div></div>`:'').join('');
@@ -492,12 +619,25 @@ function fuCard(q,key,r){
     }
     if(got.length) awardHtml+=`<div class="awarded">✔ +${val} p → ${got.join(' & ')}</div>`;
   }
+  // 📱 inskickade lagsvar: värden ser dem live; lagvyn får inmatningsfält tills svaret visas
+  let remote='';
+  if(!IS_VIEWER){
+    const rsv=[0,1].map(t=>(SVAR[t]&&SVAR[t].fu&&SVAR[t].fu[S.seg+'_'+key])||null);
+    if(rsv.some(x=>x)) remote=`<div class="note">📱 ${rsv.map((x,t)=>x?escapeHtml(S.teams[t].namn)+': „'+escapeHtml(x)+'”':'').filter(Boolean).join(' · ')}</div>`;
+  }
+  let teamHtml='';
+  if(TEAM!==null&&!shown){
+    const fk='fu'+S.seg+'_'+key;
+    teamHtml = SENTF[fk] ? `<div class="awarded">✔ Svar skickat — inväntar rättning</div>`
+      : `<div class="svarrow"><input placeholder="Ert svar…" value="${escapeHtml(INPUTBUF[fk]||'')}" oninput="INPUTBUF['${fk}']=this.value">
+         <button class="btn-green" onclick="sendFu('${key}')">Skicka</button></div>`;
+  }
   return `<div class="q">
     ${q.intro?`<div class="intro">${escapeHtml(q.intro)}</div>`:''}
     <div class="qt">${escapeHtml(q.q)}</div>
     <div class="ans ${shown?'show':''}">➜ ${escapeHtml(q.a)}</div>
     ${IS_VIEWER?'':`<button class="btn" onclick="toggleFu('${key}')">${shown?'Dölj':'Visa'} svar</button>`}
-    ${awardHtml}
+    ${remote}${teamHtml}${awardHtml}
   </div>`;
 }
 function toggleFu(key){ if(IS_VIEWER)return; S.run.fu[key]=!S.run.fu[key]; render(); }
@@ -537,7 +677,7 @@ function renderVem(seg){
     if(r.pending!==null){
       mid = IS_VIEWER
         ? `<div class="panel"><h4>${escapeHtml(S.teams[r.pending].namn)} svarar…</h4></div>`
-        : `<div class="panel"><h4>${escapeHtml(S.teams[r.pending].namn)} svarar — stämmer det?</h4>
+        : `<div class="panel"><h4>${escapeHtml(S.teams[r.pending].namn)} svarar${r.pendingSvar?' — 📱 „'+escapeHtml(r.pendingSvar)+'”':''} — stämmer det?</h4>
             <div class="judge-row"><div class="who">Rätt person?</div>
             <button class="btn-green" onclick="resolveVem(true)">✔ Rätt (+3p)</button>
             <button class="btn-red" onclick="resolveVem(false)">✗ Fel</button></div></div>`;
@@ -547,6 +687,12 @@ function renderVem(seg){
       </div><div class="controls">
         <button class="btn" ${r.idx>=curMoment().clues.length-1?'disabled':''} onclick="nextVem()">Nästa ledtråd ↓</button>
         <button class="btn-gold" onclick="giveUpVem()">Ingen svarar → visa svar</button></div>`;
+    } else if(TEAM!==null){
+      if(r.locked[TEAM]) mid=`<div class="panel"><h4>✗ Ni har redan svarat fel — momentet går vidare.</h4></div>`;
+      else if(SENTF['vem'+S.seg]) mid=`<div class="panel"><h4>⏳ Svar skickat…</h4></div>`;
+      else mid=`<div class="panel"><h4>🚨 Vet ni vem det är? · 3 p</h4>
+        <div class="svarrow"><input placeholder="Personens namn…" value="${escapeHtml(INPUTBUF['vem'+S.seg]||'')}" oninput="INPUTBUF['vem${S.seg}']=this.value">
+        <button class="btn-red" onclick="sendVem()">Svara</button></div></div>`;
     }
   }
   const facit=r.resolved?`<div class="facit"><h4>✔ Svar: ${escapeHtml(curMoment().answer)}</h4>
@@ -565,7 +711,8 @@ function renderVem(seg){
 }
 function bridgeHtml(){ return `<div class="bridge">${escapeHtml(curMoment().bridge)}</div>`; }
 function brakeVem(team){ if(IS_VIEWER)return; const r=S.run; if(r.resolved||r.locked[team]||r.pending!==null)return; r.pending=team; render(); }
-function resolveVem(correct){ if(IS_VIEWER)return; const r=S.run, t=r.pending; if(t===null)return; r.pending=null;
+function resolveVem(correct){ if(IS_VIEWER)return; const r=S.run, t=r.pending; if(t===null)return; r.pending=null; r.pendingSvar=null;
+  if(FROOT){ try{ FROOT.child('svar/'+t+'/vem').remove(); }catch(e){} }
   if(correct){ S.teams[t].p+=3; r.resolved=true; r.winner=t; }
   else { r.locked[t]=true; if(r.locked[0]&&r.locked[1]){ r.resolved=true; r.winner=null; } else if(r.idx<curMoment().clues.length-1) r.idx++; }
   render(); }
@@ -615,7 +762,9 @@ function renderListan(){
   } else {
     head=`<div class="pill">Spelar: <b style="color:var(--gold)">${escapeHtml(S.teams[r.team].namn)}</b> · valda: ${r.picks.length}/4</div>`;
   }
-  const grid = curMoment().alternativ.map((o,i)=>{
+  const order = r.order || curMoment().alternativ.map((_,i)=>i);
+  const grid = order.map(i=>{
+    const o=curMoment().alternativ[i];
     const picked=r.picks.includes(i);
     let cls='opt', mark='';
     if(r.judged){

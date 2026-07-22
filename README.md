@@ -25,12 +25,15 @@ respektive Wikipedia) och har offline-fallback.
 Spelinnehållet ligger i `resor-data.js` och genereras från en lokal kunskapsbas (ingår ej i
 repot).
 
-## Fjärrtittarvy på deltagarnas mobiler (valfritt)
+## Mobiler: tittarvy + lagvyer (valfritt)
 
-Utan konfiguration synkas tittarvyn mellan fönster på samma dator. För att deltagare ska kunna
-följa matchen live i sina mobiler: skapa ett gratis Firebase-projekt med Realtime Database,
-kopiera `firebase-config.example.js` till `firebase-config.js`, fyll i dina värden och ladda
-upp filen. Spelledarvyn visar då en rumskod (📡) — klicka för att kopiera tittarlänken.
+Utan konfiguration synkas tittarvyn mellan fönster på samma dator. Med ett gratis
+Firebase-projekt (Realtime Database) blir spelet flerspelarläge: kopiera
+`firebase-config.example.js` till `firebase-config.js`, fyll i dina värden och ladda upp filen.
+Startskärmen visar då rumskod och tre delbara länkar: **📺 Tittarvy** (följer matchen live,
+facit dolt) samt **📱 Lag 1/Lag 2** — lagvyer där laget drar i nödbromsen med sin
+resmålsgissning, skickar svar på följdfrågor/musikfråga och buzzar i Vem där?, direkt från
+mobilen. Spelledaren ser inskickade svar och dömer rätt/fel som vanligt.
 
 ## Licens
 
